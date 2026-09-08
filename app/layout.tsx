@@ -4,6 +4,9 @@ import "./globals.css"
 import ThemeProvider from "@/context/Theme"
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/toast"
+import { SessionProvider } from "next-auth/react"
+import { auth } from "@/auth"
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -28,18 +31,24 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+const RootLayout = async ({
   children,
 }: Readonly<{
   children: React.ReactNode
-}>) {
+}>) => {
+  const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
-      </body>
+      <SessionProvider session={session}>
+        <body className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`} suppressHydrationWarning>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            {children}
+          </ThemeProvider>
+        </body>
+        <Toaster />
+      </SessionProvider>
     </html>
   )
 }
+
+export default RootLayout
