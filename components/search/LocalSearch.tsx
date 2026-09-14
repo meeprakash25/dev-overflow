@@ -29,11 +29,11 @@ const LocalSearch = ({ route, imgSrc, placeholder, otherClasses }: Props) => {
       } else {
         if (pathname === route && !searchQuery && query) {
           const newUrl = removeKeysFromUrlQuery({ params: searchParamsString, keysToRemove: ["query"] })
-         router.push(newUrl)
+          router.push(newUrl)
         }
       }
     }, 300)
-   
+
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery, query, router, route, searchParamsString, pathname])
 
