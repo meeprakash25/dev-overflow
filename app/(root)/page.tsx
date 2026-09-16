@@ -1,3 +1,4 @@
+import QuestionCard from "@/components/cards/QuestionCard"
 import HomeFilter from "@/components/filters/HomeFilter"
 import LocalSearch from "@/components/search/LocalSearch"
 import { Button } from "@/components/ui/button"
@@ -21,7 +22,7 @@ const questions = [
     author: {
       _id: "1",
       name: "John Doe",
-      avatar: "/images/avatar.jpg",
+      image: "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
     },
     upvotes: 100,
     downvotes: 20,
@@ -41,7 +42,7 @@ const questions = [
     author: {
       _id: "1",
       name: "John Doe",
-      avatar: "/images/avatar.jpg",
+      image: "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
     },
     upvotes: 10,
     downvotes: 2,
@@ -61,7 +62,7 @@ const questions = [
     author: {
       _id: "1",
       name: "John Doe",
-      avatar: "/images/avatar.jpg",
+      image: "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
     },
     upvotes: 50,
     downvotes: 5,
@@ -83,7 +84,7 @@ const Home = async ({ searchParams }: SearchParams) => {
       <section className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="h1-bold text-dark100_light900">All Questions</h1>
         <Button className="primary-gradient min-h-[46px] px-4 py-3 !text-light-900_dark200">
-          <Link href={ROUTES.ASK_QUESTION} className="flex items-center gap-2 text-dark100_light900">
+          <Link href={`/`} className="flex items-center gap-2 text-dark100_light900">
             Ask a Question
           </Link>
         </Button>
@@ -94,7 +95,7 @@ const Home = async ({ searchParams }: SearchParams) => {
       <HomeFilter />
       <div className="mt-10 w-full flex flex-col gap-6">
         { filteredQuestions.map((question) => (
-          <h1 key={question._id}>{question.title}</h1>
+          <QuestionCard key={question._id} question={question} />
         ))}
       </div>
     </>
