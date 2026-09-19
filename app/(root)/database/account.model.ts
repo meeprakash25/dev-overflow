@@ -9,7 +9,7 @@ export interface IAccount {
   providerAccountId?: string
 }
 
-const AccountSchema = new Schema(
+const AccountSchema = new Schema<IAccount>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true },
@@ -21,6 +21,6 @@ const AccountSchema = new Schema(
   { timestamps: true },
 )
 
-const Account = models?.account || model<IAccount>("Account", AccountSchema)
+const Account = models?.Account || model<IAccount>("Account", AccountSchema)
 
 export default Account
