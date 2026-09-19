@@ -22,7 +22,8 @@ const questions = [
     author: {
       _id: "1",
       name: "John Doe",
-      image: "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
+      image:
+        "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
     },
     upvotes: 100,
     downvotes: 20,
@@ -42,7 +43,8 @@ const questions = [
     author: {
       _id: "1",
       name: "John Doe",
-      image: "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
+      image:
+        "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
     },
     upvotes: 10,
     downvotes: 2,
@@ -62,7 +64,8 @@ const questions = [
     author: {
       _id: "1",
       name: "John Doe",
-      image: "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
+      image:
+        "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
     },
     upvotes: 50,
     downvotes: 5,
@@ -72,7 +75,7 @@ const questions = [
   },
 ]
 const Home = async ({ searchParams }: SearchParams) => {
-  const { query="", filter="" } = await searchParams
+  const { query = "", filter = "" } = await searchParams
   const filteredQuestions = questions.filter((question) => {
     const matchesQuery = question.title.toLowerCase().includes(query?.toLowerCase())
     const matchesFilter = filter ? question.tags.some((tag) => tag.name.toLowerCase() === filter.toLowerCase()) : true
@@ -94,7 +97,7 @@ const Home = async ({ searchParams }: SearchParams) => {
       </section>
       <HomeFilter />
       <div className="mt-10 w-full flex flex-col gap-6">
-        { filteredQuestions.map((question) => (
+        {filteredQuestions.map((question) => (
           <QuestionCard key={question._id} question={question} />
         ))}
       </div>

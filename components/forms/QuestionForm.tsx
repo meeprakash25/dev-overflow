@@ -70,9 +70,9 @@ const QuestionForm = () => {
         control={form.control}
         name="title"
         render={({ field, fieldState }) => (
-          <Field className="flex-w-full flex-col gap-2" data-invalid={fieldState.invalid}>
+          <Field className="flex w-full flex-col gap-2" data-invalid={fieldState.invalid ? "true" : undefined}>
             <FieldLabel className="paragraph-semibold text-dark400_light800" htmlFor="title">
-              Question Title <span className="text-primary-500">*</span>
+              Question Title <span className="text-red-500">*</span>
             </FieldLabel>
             <Input
               {...field}
@@ -85,7 +85,7 @@ const QuestionForm = () => {
             <FieldDescription className="body-regular mt-2.5 text-light-500">
               Be specific and imagine that you're asking a question to another
             </FieldDescription>
-            <FieldError className="text-primary-500" errors={[fieldState.error]} />
+            <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
         )}
       />
@@ -94,15 +94,15 @@ const QuestionForm = () => {
         control={form.control}
         name="content"
         render={({ field, fieldState }) => (
-          <Field className="flex-w-full flex-col gap-2" data-invalid={fieldState.invalid}>
+          <Field className="flex w-full flex-col gap-2" data-invalid={fieldState.invalid ? "true" : undefined}>
             <FieldLabel className="paragraph-semibold text-dark400_light800" htmlFor="content">
-              Detailed explanation of your problem <span className="text-primary-500">*</span>
+              Detailed explanation of your problem <span className="text-red-500">*</span>
             </FieldLabel>
             <Editor value={field.value} fieldChange={field.onChange} editorRef={editorRef} />
             <FieldDescription className="body-regular mt-2.5 text-light-500">
               Introduce the problem and expand what you've put in the title
             </FieldDescription>
-            <FieldError className="text-primary-500" errors={[fieldState.error]} />
+            <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
         )}
       />
@@ -111,9 +111,9 @@ const QuestionForm = () => {
         control={form.control}
         name="tags"
         render={({ field, fieldState }) => (
-          <Field className="flex-w-full flex-col gap-3" data-invalid={fieldState.invalid}>
+          <Field className="flex w-full flex-col gap-3" data-invalid={fieldState.invalid ? "true" : undefined}>
             <FieldLabel className="paragraph-semibold text-dark400_light800" htmlFor="tags">
-              Tags <span className="text-primary-500">*</span>
+              Tags <span className="text-red-500">*</span>
             </FieldLabel>
             <div>
               <Input
@@ -143,7 +143,7 @@ const QuestionForm = () => {
             <FieldDescription className="body-regular mt-2.5 text-light-500">
               Add upto 3 tags to describe what your question is about. You need to press enter to add a tag.
             </FieldDescription>
-            <FieldError className="text-primary-500" errors={[fieldState.error]} />
+            <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
         )}
       />
