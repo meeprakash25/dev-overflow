@@ -3,10 +3,19 @@ import HomeFilter from "@/components/filters/HomeFilter"
 import LocalSearch from "@/components/search/LocalSearch"
 import { Button } from "@/components/ui/button"
 import ROUTES from "@/constants/routes"
+import { api } from "@/lib/api"
 import handleError from "@/lib/handlers/error"
 import { NotFoundError, ValidationError } from "@/lib/http-errors"
 import dbConnect from "@/lib/mongoose"
 import Link from "next/link"
+
+const test = async () => {
+  try {
+    return await api.users.getAll()
+  } catch (error) {
+    return handleError(error)
+  }
+}
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>
@@ -79,6 +88,10 @@ const questions = [
 ]
 
 const Home = async ({ searchParams }: SearchParams) => {
+
+  const users = await test()
+  console.log(users)
+
   const { query = "", filter = "" } = await searchParams
   const filteredQuestions = questions.filter((question) => {
     const matchesQuery = question.title.toLowerCase().includes(query?.toLowerCase())
