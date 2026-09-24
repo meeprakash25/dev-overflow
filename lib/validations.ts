@@ -54,3 +54,22 @@ export const UserSchema = z.object({
   portfolio: z.url({ message: "Please provide a valid URL" }).optional(),
   reputation: z.number().optional(),
 })
+
+export const AccountSchema = z.object({
+  userId: z.string({ message: "User ID must be a string" }).min(1, { message: "User ID is required" }),
+  name: z.string({ message: "Name must be a string" }).min(1, { message: "Name is required" }),
+  image: z.url({ message: "Please provide a valid URL" }).optional(),
+  password: z
+    .string({ message: "Password must be a string" })
+    .min(6, "Password must be at least 6 characters")
+    .max(100, "Password cannot exceed 100 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^a-zA-Z0-9]/, "Password must be at least one special character")
+    .optional(),
+  provider: z.string({ message: "Provider must be a string" }).min(1, { message: "Provider is required" }),
+  providerAccountId: z
+    .string({ message: "Provider account ID must be a string" })
+    .min(1, { message: "Provider account ID is required" }),
+})
