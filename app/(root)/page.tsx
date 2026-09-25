@@ -1,3 +1,4 @@
+import { auth } from "@/auth"
 import QuestionCard from "@/components/cards/QuestionCard"
 import HomeFilter from "@/components/filters/HomeFilter"
 import LocalSearch from "@/components/search/LocalSearch"
@@ -9,13 +10,13 @@ import { NotFoundError, ValidationError } from "@/lib/http-errors"
 import dbConnect from "@/lib/mongoose"
 import Link from "next/link"
 
-const test = async () => {
-  try {
-    return await api.users.getAll()
-  } catch (error) {
-    return handleError(error)
-  }
-}
+// const test = async () => {
+//   try {
+//     return await api.users.getAll()
+//   } catch (error) {
+//     return handleError(error)
+//   }
+// }
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>
@@ -89,8 +90,9 @@ const questions = [
 
 const Home = async ({ searchParams }: SearchParams) => {
 
-  const users = await test()
-  console.log(users)
+  const session = await auth()
+
+  console.log("Session: ", session)
 
   const { query = "", filter = "" } = await searchParams
   const filteredQuestions = questions.filter((question) => {
@@ -103,7 +105,7 @@ const Home = async ({ searchParams }: SearchParams) => {
     <>
       <section className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="h1-bold text-dark100_light900">All Questions</h1>
-        <Button className="primary-gradient min-h-[46px] px-4 py-3 !text-light-900_dark200">
+        <Button className="primary-gradient min-h-[46px] px-4 py-3 !text-light900_dark200">
           <Link href={ROUTES.ASK_QUESTION} className="flex items-center gap-2 text-dark100_light900">
             Ask a Question
           </Link>
