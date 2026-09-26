@@ -7,7 +7,7 @@ import handleError from "../handlers/error"
 import mongoose from "mongoose"
 import User from "@/app/(root)/database/user.model"
 import bcrypt from "bcryptjs"
-import Account, { IAccount } from "@/app/(root)/database/account.model"
+import Account from "@/app/(root)/database/account.model"
 import { signIn } from "@/auth"
 import { NotFoundError } from "../http-errors"
 
@@ -73,7 +73,7 @@ export async function signInWithCredentials(params: Pick<AuthCredentials,"email"
     const existingUser = await User.findOne({ email })
     if (!existingUser) throw new NotFoundError("User")
 
-    const existingAccount = await Account.findOne({ provider: "credentials", providerAccountId: email }) as IAccount
+    const existingAccount = await Account.findOne({ provider: "credentials", providerAccountId: email })
     if (!existingAccount) throw new NotFoundError("Account")
     
     const passwordMatch = await bcrypt.compare(password, existingAccount.password!)
