@@ -1,34 +1,54 @@
 "use client"
 
-import { Controller, DefaultValues, FieldPath, FieldValues, Path, SubmitHandler, useForm } from "react-hook-form"
+import { Controller, DefaultValues, FieldValues, Path, SubmitHandler, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { z, ZodType } from "zod"
 
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import ROUTES from "@/constants/routes"
 import Link from "next/link"
+import { ActionResponse } from "@/types/global"
+import { toast } from "../ui/toast"
+import { useRouter } from "next/navigation"
 
 interface AuthFormProps<T extends FieldValues> {
-  schema: z.ZodType<T, T>
+  schema: ZodType<T,T>
   defaultValues: DefaultValues<T>
-  onSubmit: SubmitHandler<T>
+  onSubmit: (data: T) => Promise<ActionResponse>
   formType: "SIGN_IN" | "SIGN_UP"
 }
 
 const AuthForm = <T extends FieldValues>({ schema, defaultValues, formType, onSubmit }: AuthFormProps<T>) => {
+  const router = useRouter()
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>,
   })
 
-  const handleSubmit: SubmitHandler<T> = async () => {
-    console.log("data")
+  const handleSubmit: SubmitHandler<T> = async (data) => {
+    const result = (await onSubmit(data)) as ActionResponse
+
+    if (result?.success) {
+      toast.add({
+        title: "Success",
+        description: formType === "SIGN_IN" ? "Signed in successfully" : "Signed up successfully",
+        type:"success"
+      })
+
+      router.push(ROUTES.HOME)
+    } else {
+      toast.add({
+        title: `Error ${result?.status}`,
+        description: result?.error?.message,
+        type: "error",
+      })
+    }
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-md space-y-6 pt-6">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full max-w-md space-y-6 pt-6">
       {Object.keys(defaultValues).map((field) => (
         <Controller
           key={String(field)}
@@ -47,7 +67,7 @@ const AuthForm = <T extends FieldValues>({ schema, defaultValues, formType, onSu
                 placeholder={String(field.name).charAt(0).toUpperCase() + String(field.name).slice(1)}
                 aria-invalid={fieldState.invalid ? "true" : undefined}
               />
-              <FieldError errors={[fieldState.error]} />
+              <FieldError className="text-red-500" errors={[fieldState.error]} />
             </Field>
           )}
         />

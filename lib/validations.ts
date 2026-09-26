@@ -7,11 +7,11 @@ export const SignInSchema = z.object({
 
 export const SignUpSchema = z
   .object({
-    name: z.string({ message: "Name must be a string" }).min(3, "Name must be at least 3 characters"),
-    username: z.string({ message: "Username must be a string" }).min(3, "Username must be at least 3 characters"),
+    name: z.string("Name field is required").min(3, "Name must be at least 3 characters"),
+    username: z.string("Username field is required").min(3, "Username must be at least 3 characters"),
     email: z.email("Invalid email address"),
     password: z
-      .string({ message: "Password must be a string" })
+      .string("Password field is required")
       .min(6, "Password must be at least 6 characters")
       .max(100, "Password cannot exceed 100 characters")
       .regex(/[A-Z]/, "Password must contain at least one uppercase letter")

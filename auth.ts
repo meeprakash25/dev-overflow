@@ -22,7 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         
         const userId = existingAccount.userId
 
-        if(userId) token.sub == userId.toString()
+        if(userId) token.sub = userId.toString()
       }
       return token
     },
