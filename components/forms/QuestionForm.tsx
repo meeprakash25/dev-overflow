@@ -7,17 +7,25 @@ import { Field, FieldError, FieldLabel, FieldDescription } from "../ui/field"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import z from "zod"
-import { useRef } from "react"
+import { useRef, useTransition } from "react"
 import { MDXEditorMethods } from "@mdxeditor/editor"
 import dynamic from "next/dynamic"
 import TagCard from "../cards/TagCard"
+import { createQuestion } from "@/lib/actions/question.action"
+import { useRouter } from "next/navigation"
+import { toast } from "../ui/toast"
+import ROUTES from "@/constants/routes"
+import { ReloadIcon } from "@radix-ui/react-icons"
 
 const Editor = dynamic(() => import("@/components/editor"), {
   ssr: false,
 })
 
 const QuestionForm = () => {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const editorRef = useRef<MDXEditorMethods>(null)
+
   const form = useForm<z.infer<typeof AskQuestionSchema>>({
     resolver: zodResolver(AskQuestionSchema),
     defaultValues: {
@@ -27,8 +35,24 @@ const QuestionForm = () => {
     },
   })
 
-  const handleCreateQuestion = (data: z.infer<typeof AskQuestionSchema>) => {
-    console.log("Question submitted:", data)
+  const handleCreateQuestion = async (data: z.infer<typeof AskQuestionSchema>) => {
+    startTransition(async () => {
+      const result = await createQuestion(data)
+      if (result.success) {
+        toast.add({
+          title: "Success",
+          description: "Question created successfully",
+          type: "success",
+        })
+        if (result.data) router.push(ROUTES.QUESTION(result.data?._id))
+      } else {
+        toast.add({
+          title: "Error",
+          description: result.error?.message || "Something went wrong",
+          type: "error",
+        })
+      }
+    })
   }
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, field: { value: string[] }) => {
@@ -149,8 +173,13 @@ const QuestionForm = () => {
       />
 
       <div className="mt-16 flex justify-end">
-        <Button type="submit" className="primary-gradient !text-light900 w-fit" disabled={form.formState.isSubmitting}>
-          Ask A Question
+        <Button type="submit" className="primary-gradient !text-light900 w-fit" disabled={isPending}>
+          {isPending ?
+            <>
+              <ReloadIcon className="mr-2 size-4 animate-spin" />
+              <span>Submitting...</span>
+            </>
+          : <>Ask Question</>}
         </Button>
       </div>
     </form>

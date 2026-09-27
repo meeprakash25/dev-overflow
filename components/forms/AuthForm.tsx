@@ -9,7 +9,6 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import ROUTES from "@/constants/routes"
 import Link from "next/link"
-import { ActionResponse } from "@/types/global"
 import { toast } from "../ui/toast"
 import { useRouter } from "next/navigation"
 

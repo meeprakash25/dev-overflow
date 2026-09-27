@@ -107,7 +107,7 @@ const Home = async ({ searchParams }: SearchParams) => {
         <h1 className="h1-bold text-dark100_light900">All Questions</h1>
         <Button className="primary-gradient min-h-[46px] px-4 py-3 !text-light900_dark200">
           <Link href={ROUTES.ASK_QUESTION} className="flex items-center gap-2 text-dark100_light900">
-            Ask a Question
+            Ask Question
           </Link>
         </Button>
       </section>

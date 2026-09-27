@@ -30,7 +30,7 @@ const UserAvatar = ({
       <Avatar className={className}>
         {imageUrl ?
           <Image src={imageUrl} alt={name ?? "avatar"} className="object-cover rounded-full" width={36} height={36} quality={100} />
-        : <AvatarFallback className="primary-gradient font-space-grotest font-bold tracking-wider text-white">
+        : <AvatarFallback className="primary-gradient font-space-grotesk font-bold tracking-wider text-white">
             {initials}
           </AvatarFallback>
         }

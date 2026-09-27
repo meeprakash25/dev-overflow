@@ -1,6 +1,5 @@
 "use server"
 
-import { ActionResponse, ErrorResponse } from "@/types/global"
 import action from "../handlers/action"
 import { SignInSchema, SignUpSchema } from "../validations"
 import handleError from "../handlers/error"
@@ -53,7 +52,7 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
 
     return { success: true }
   } catch (error) {
-    await session.abortTransaction()
+    if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
   } finally {
     await session.endSession()

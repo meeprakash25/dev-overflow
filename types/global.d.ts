@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server"
+type SuccessResponse<T = null> = ActionResponse<T> & { success: true }
+type ErrorResponse<T = null> = ActionResponse<undefined> & { false: true }
 
+type APIErrorResponse = NextResponse<ErrorResponse>
+type APIResponse<T = null> = NextResponse<SuccessResponse | ErrorResponse>
 interface Tag {
   _id: string
   name: string
@@ -34,8 +37,7 @@ type ActionResponse<T = null> = {
   status?: number
 }
 
-type SuccessResponse<T = null> = ActionResponse<T> & { success: true }
-type ErrorResponse<T = null> = ActionResponse<undefined> & { false: true }
-
-type APIErrorResponse = NextResponse<ErrorResponse>
-type APIResponse<T = null> = NextResponse<SuccessResponse | ErrorResponse>
+interface RouteParams {
+  params: Promise<Record<string, string>>
+  searchParams: Promise<Record<string,string>>
+}

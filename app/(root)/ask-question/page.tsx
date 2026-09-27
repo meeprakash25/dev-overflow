@@ -1,0 +1,22 @@
+import { auth } from "@/auth"
+import QuestionForm from "@/components/forms/QuestionForm"
+import ROUTES from "@/constants/routes"
+import { redirect } from "next/navigation"
+import React from "react"
+
+const AskAQuestion = async () => {
+  const session = await auth()
+  if (!session) return redirect(ROUTES.SIGN_IN)
+
+  if (!session) return
+  return (
+    <>
+      <div className="h1-bold text-dark100_light900">QuestionForm</div>
+      <div className="mt-9">
+        <QuestionForm />
+      </div>
+    </>
+  )
+}
+
+export default AskAQuestion

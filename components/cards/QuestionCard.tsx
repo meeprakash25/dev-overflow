@@ -3,7 +3,6 @@ import { getTimeStamp } from "@/lib/utils"
 import ROUTES from "@/constants/routes"
 import TagCard from "./TagCard"
 import Metric from "../ui/Metric"
-import { Question, Tag } from "@/types/global"
 
 interface Props {
   question: Question

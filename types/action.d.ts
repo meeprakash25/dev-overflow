@@ -16,3 +16,9 @@ interface AuthCredentials {
   password: string
   confirmPassword: string
 }
+
+interface CreateQuestionParams {
+  title: string
+  content: string
+  tags: string[]
+}

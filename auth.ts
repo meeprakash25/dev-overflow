@@ -2,7 +2,6 @@ import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import { api } from "./lib/api"
-import { ActionResponse } from "./types/global"
 import { IAccountDoc } from "./app/(root)/database/account.model"
 import { IUserDoc } from "./app/(root)/database/user.model"
 import Credentials from "next-auth/providers/credentials"
@@ -36,7 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (isValidPassword) {
             return {
-              id: existingUser._id,
+              id: existingUser._id.toString(),
               name: existingUser.name,
               email: existingUser.email,
               image: existingUser.image,
