@@ -1,13 +1,14 @@
 "use server"
 
-import { AskQuestionSchema, EditQuestionSchema, GetQuestionSchema } from "../validations"
+import { AskQuestionSchema, EditQuestionSchema, GetQuestionSchema, PaginatedSearchParamsSchema } from "../validations"
 import action from "../handlers/action"
 import handleError from "../handlers/error"
-import mongoose from "mongoose"
-import Question from "@/app/(root)/database/question.model"
+import mongoose, { type QueryFilter } from "mongoose"
+import Question, { IQuestionDoc } from "@/app/(root)/database/question.model"
 import Tag from "@/app/(root)/database/tag.model"
-import type { ITag, ITagDoc } from "@/app/(root)/database/tag.model"
+import type { ITagDoc } from "@/app/(root)/database/tag.model"
 import TagQuestion from "@/app/(root)/database/tag-question.model"
+import { defaultPageSize } from "@/constants"
 
 export async function createQuestion(params: CreateQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
@@ -63,7 +64,7 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
   }
 }
 
-export async function editQuestion(params: EditQuestionParams): Promise<ActionResponse<Question>> {
+export async function editQuestion(params: EditQuestionParams): Promise<ActionResponse<IQuestionDoc>> {
   const validationResult = await action({
     params,
     schema: EditQuestionSchema,
@@ -100,14 +101,14 @@ export async function editQuestion(params: EditQuestionParams): Promise<ActionRe
       (tag) => !question.tags.some((existingTag) => existingTag.name.toLowerCase() === tag.toLowerCase()),
     )
 
-    const tagsToRemove = question.tags.filter((tag) => !tags.includes(tag.name.toLowerCase()))
+    const tagsToRemove = question.tags.filter((tag) => !tags.some((t) => t.toLowerCase() === tag.name.toLowerCase()))
 
     const newTagQuestionDocuments = []
     if (tagsToAdd.length > 0) {
       for (const tag of tagsToAdd) {
         const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
         const existingTag = await Tag.findOneAndUpdate(
-          { name: { $regex: new RegExp(`^${escapedTag}$`, "i") } },
+          { name: { $regex: `^${escapedTag}$`, $options: "i" } },
           { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
           { upsert: true, new: true, session },
         )
@@ -127,11 +128,12 @@ export async function editQuestion(params: EditQuestionParams): Promise<ActionRe
       await Tag.updateMany({ _id: { $in: tagIdsToRemove } }, { $inc: { questions: -1 } }, { session })
       await TagQuestion.deleteMany({ tag: { $in: tagIdsToRemove }, question: questionId }, { session })
 
-      question.tags = question.tags.filter((tag) => !tagsToRemove.includes(tag))
+      question.tags = question.tags.filter(
+        (tag) => !tagIdsToRemove.some((id) => id.equals(tag._id))
+      )
     }
 
     if (newTagQuestionDocuments) await TagQuestion.insertMany(newTagQuestionDocuments, { session })
-
 
     await question.save()
 
@@ -166,6 +168,68 @@ export async function getQuestion(params: GetQuestionParams): Promise<ActionResp
     }
 
     return { success: true, data: JSON.parse(JSON.stringify(question)) }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}
+
+export async function getQuestions(
+  params: PaginatedSearchParams,
+): Promise<ActionResponse<{ questions: Question[]; isNext: boolean }>> {
+  const validationResult = await action({
+    params,
+    schema: PaginatedSearchParamsSchema,
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const { page = 1, pageSize = defaultPageSize, query, filter } = params
+  const skip = (Number(page) - 1) * pageSize
+  const limit = Number(pageSize)
+
+  const filterQuery: QueryFilter<typeof Question> = {}
+
+  if (filter === "recommended") return { success: true, data: { questions: [], isNext: false } }
+
+  if (query) {
+    filterQuery.$or = [{ title: { $regex: new RegExp(query, "i") } }, { content: { $regex: new RegExp(query, "i") } }]
+  }
+
+  let sortCriteria = {}
+
+  switch (filter) {
+    case "newest":
+      sortCriteria = { createdAt: -1 }
+      break
+    case "unanswered":
+      filterQuery.answers = 0
+      sortCriteria = { createdAt: -1 }
+      break
+    case "popular":
+      sortCriteria = { upvotes: -1 }
+      break
+    default:
+      sortCriteria = { createdAt: -1 }
+      break
+  }
+
+  try {
+    const totalQuestions = await Question.countDocuments(filterQuery)
+    const questions = await Question.find(filterQuery)
+      .populate("tags", "name")
+      .populate("author", "name image")
+      .lean()
+      .sort(sortCriteria)
+      .skip(skip)
+      .limit(limit)
+    const isNext = totalQuestions > skip + questions.length
+
+    return {
+      success: true,
+      data: { questions: JSON.parse(JSON.stringify(questions)), isNext },
+    }
   } catch (error) {
     return handleError(error) as ErrorResponse
   }

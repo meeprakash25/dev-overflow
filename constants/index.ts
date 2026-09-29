@@ -35,3 +35,5 @@ export const sideBarLinks = [
     label: "Ask question",
   },
 ]
+
+export const defaultPageSize = 10

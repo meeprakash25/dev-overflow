@@ -1,105 +1,27 @@
-import { auth } from "@/auth"
 import QuestionCard from "@/components/cards/QuestionCard"
 import HomeFilter from "@/components/filters/HomeFilter"
 import LocalSearch from "@/components/search/LocalSearch"
 import { Button } from "@/components/ui/button"
 import ROUTES from "@/constants/routes"
-import { api } from "@/lib/api"
-import handleError from "@/lib/handlers/error"
-import { NotFoundError, ValidationError } from "@/lib/http-errors"
-import dbConnect from "@/lib/mongoose"
+import { getQuestions } from "@/lib/actions/question.action"
 import Link from "next/link"
-
-// const test = async () => {
-//   try {
-//     return await api.users.getAll()
-//   } catch (error) {
-//     return handleError(error)
-//   }
-// }
+import { defaultPageSize } from "@/constants"
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>
 }
 
-const questions = [
-  {
-    _id: "1",
-    title: "How to use github copilot?",
-    content: "I am new to github copilot and I want to know how to use it. Can someone help me?",
-    tags: [
-      { _id: "1", name: "github" },
-      { _id: "2", name: "copilot" },
-      { _id: "3", name: "ai" },
-    ],
-    author: {
-      _id: "1",
-      name: "John Doe",
-      image:
-        "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
-    },
-    upvotes: 100,
-    downvotes: 20,
-    answers: 8,
-    views: 500,
-    createdAt: new Date("2023-01-01T00:00:00Z"),
-  },
-  {
-    _id: "2",
-    title: "How to use React Query?",
-    content: "I am new to React Query and I want to know how to use it. Can someone help me?",
-    tags: [
-      { _id: "1", name: "react" },
-      { _id: "2", name: "query" },
-      { _id: "3", name: "data-fetching" },
-    ],
-    author: {
-      _id: "1",
-      name: "John Doe",
-      image:
-        "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
-    },
-    upvotes: 10,
-    downvotes: 2,
-    answers: 5,
-    views: 100,
-    createdAt: new Date("2023-01-02T00:00:00Z"),
-  },
-  {
-    _id: "3",
-    title: "How to use Redux?",
-    content: "I am new to Redux and I want to know how to use it. Can someone help me?",
-    tags: [
-      { _id: "1", name: "react" },
-      { _id: "2", name: "redux" },
-      { _id: "3", name: "state-management" },
-    ],
-    author: {
-      _id: "1",
-      name: "John Doe",
-      image:
-        "https://static.vecteezy.com/system/resources/previews/028/536/930/non_2x/young-woman-head-portrait-beautiful-girl-face-avatar-beautiful-attractive-female-character-illustration-vector.jpg",
-    },
-    upvotes: 50,
-    downvotes: 5,
-    answers: 15,
-    views: 300,
-    createdAt: new Date("2023-01-03T00:00:00Z"),
-  },
-]
-
 const Home = async ({ searchParams }: SearchParams) => {
+  const { page, pageSize, query, filter } = await searchParams
 
-  const session = await auth()
-
-  console.log("Session: ", session)
-
-  const { query = "", filter = "" } = await searchParams
-  const filteredQuestions = questions.filter((question) => {
-    const matchesQuery = question.title.toLowerCase().includes(query?.toLowerCase())
-    const matchesFilter = filter ? question.tags.some((tag) => tag.name.toLowerCase() === filter.toLowerCase()) : true
-    return matchesQuery && matchesFilter
+  const { success, data, error } = await getQuestions({
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || defaultPageSize,
+    query: query || "",
+    filter: filter || "",
   })
+
+  const { questions } = data || {}
 
   return (
     <>
@@ -115,11 +37,19 @@ const Home = async ({ searchParams }: SearchParams) => {
         <LocalSearch route={ROUTES.HOME} imgSrc="/icons/search.svg" placeholder="Search Questions..." otherClasses="" />
       </section>
       <HomeFilter />
-      <div className="mt-10 w-full flex flex-col gap-6">
-        {filteredQuestions.map((question) => (
-          <QuestionCard key={question._id} question={question} />
-        ))}
-      </div>
+      {success ?
+        <div className="mt-10 w-full flex flex-col gap-6">
+          {questions && questions.length > 0 ?
+            questions.map((question) => <QuestionCard key={question._id} question={question} />)
+          : <div className="mt-10 flex w-full items-center justify-center">
+              <p className="textdark400_light700">No questions found</p>
+            </div>
+          }
+        </div>
+      : <div className="mt-10 flex w-full items-center justify-center">
+          <p className="text-dark400_light700">{error?.message || "Failed to fetch questions"}</p>
+        </div>
+      }
     </>
   )
 }
