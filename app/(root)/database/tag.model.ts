@@ -1,9 +1,11 @@
-import { model, models, Schema, Types } from "mongoose"
+import { Document, Model, model, models, Schema, Types } from "mongoose"
 
 export interface ITag {
- name: string
- questions: number
+  name: string
+  questions: number
 }
+
+export interface ITagDoc extends ITag, Document {}
 
 const TagSchema = new Schema<ITag>(
   {
@@ -15,6 +17,6 @@ const TagSchema = new Schema<ITag>(
   },
 )
 
-const Tag = models?.Tag || model<ITag>("Tag", TagSchema)
+const Tag = (models.Tag as Model<ITag> | undefined) ?? model<ITag>("Tag", TagSchema)
 
 export default Tag

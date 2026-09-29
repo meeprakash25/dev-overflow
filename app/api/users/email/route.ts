@@ -21,6 +21,6 @@ export async function POST(request: Request) {
       data: user,
     })
   } catch (error) {
-    return handleError(error, "api") as ErrorResponse
+    return handleError(error, "api") as APIErrorResponse
   }
 }

@@ -1,4 +1,4 @@
-import { model, models, Schema, Types } from "mongoose"
+import { Model, model, models, Schema, Types } from "mongoose"
 
 export interface IVote {
   author: Types.ObjectId
@@ -19,6 +19,6 @@ const VoteSchema = new Schema<IVote>(
   },
 )
 
-const Vote = models?.Vote || model<IVote>("Vote", VoteSchema)
+const Vote = (models.Vote as Model<IVote> | undefined) ?? model<IVote>("Vote", VoteSchema)
 
 export default Vote

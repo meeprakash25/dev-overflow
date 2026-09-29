@@ -1,4 +1,4 @@
-import { model, models, Schema, Types } from "mongoose"
+import { Model, model, models, Schema, Types } from "mongoose"
 
 export interface ITagQuestion {
   tag: Types.ObjectId
@@ -15,6 +15,6 @@ const TagQuestionSchema = new Schema<ITagQuestion>(
   },
 )
 
-const TagQuestion = models?.TagQuestion || model<ITagQuestion>("TagQuestion", TagQuestionSchema)
+const TagQuestion = models.TagQuestion as Model<ITagQuestion> | undefined ?? model<ITagQuestion>("TagQuestion", TagQuestionSchema)
 
 export default TagQuestion
