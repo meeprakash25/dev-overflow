@@ -26,7 +26,7 @@ const questions = [
   {
     _id: "1",
     title: "How to use github copilot?",
-    description: "I am new to github copilot and I want to know how to use it. Can someone help me?",
+    content: "I am new to github copilot and I want to know how to use it. Can someone help me?",
     tags: [
       { _id: "1", name: "github" },
       { _id: "2", name: "copilot" },
@@ -47,7 +47,7 @@ const questions = [
   {
     _id: "2",
     title: "How to use React Query?",
-    description: "I am new to React Query and I want to know how to use it. Can someone help me?",
+    content: "I am new to React Query and I want to know how to use it. Can someone help me?",
     tags: [
       { _id: "1", name: "react" },
       { _id: "2", name: "query" },
@@ -68,7 +68,7 @@ const questions = [
   {
     _id: "3",
     title: "How to use Redux?",
-    description: "I am new to Redux and I want to know how to use it. Can someone help me?",
+    content: "I am new to Redux and I want to know how to use it. Can someone help me?",
     tags: [
       { _id: "1", name: "react" },
       { _id: "2", name: "redux" },
