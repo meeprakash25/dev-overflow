@@ -8,7 +8,7 @@ export interface IUser {
   image: string
   location?: string
   portfolio?: string
-  reputation?: string
+  reputation?: number
 }
 
 export interface IUserDoc extends IUser, Document {}
