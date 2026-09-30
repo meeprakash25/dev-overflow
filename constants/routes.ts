@@ -6,8 +6,9 @@ const ROUTES = {
   COLLECTION: "/collection",
   COMMUNITY: "/community",
   JOBS: "/jobs",
+  TAGS:"/tags",
   PROFILE: (id: string) => `/profile/${id}`,
-  TAGS: (id: string) => `/tags/${id}`,
+  TAG: (id: string) => `/tags/${id}`,
   QUESTION: (id: string) => `/questions/${id}`,
   SIGN_IN_WITH_OAUTH: "signin-with-oauth",
 }

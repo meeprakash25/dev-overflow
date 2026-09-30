@@ -44,7 +44,7 @@ const TagCard = ({ _id, name, questions, showCount, compact, remove, isButton, h
   if (compact) {
     return isButton ?
         <button className="flex justify-between gap-2" onClick={(e)=>e.preventDefault()}>{content}</button>
-      : <Link href={ROUTES.TAGS(_id)} className="flex cursor-pointer justify-between gap-2">
+      : <Link href={ROUTES.TAG(_id)} className="flex cursor-pointer justify-between gap-2">
           {content}
         </Link>
   }

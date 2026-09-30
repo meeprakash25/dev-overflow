@@ -195,7 +195,7 @@ const QuestionForm = ({ question, isEdit = false }: Params) => {
               )}
             </div>
             <FieldDescription className="body-regular mt-2.5 text-light-500">
-              Add upto 3 tags to describe what your question is about. You need to press enter to add a tag.
+              Add upto 5 tags to describe what your question is about. You need to press enter to add a tag.
             </FieldDescription>
             <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
@@ -203,7 +203,7 @@ const QuestionForm = ({ question, isEdit = false }: Params) => {
       />
 
       <div className="mt-16 flex justify-end">
-        <Button type="submit" className="primary-gradient !text-light900 w-fit" disabled={isPending}>
+        <Button type="submit" className="primary-gradient !text-light-900 w-fit" disabled={isPending}>
           {isPending ?
             <>
               <ReloadIcon className="mr-2 size-4 animate-spin" />

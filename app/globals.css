@@ -486,6 +486,10 @@ code {
   color: inherit !important;
 }
 
+a, button {
+  cursor: pointer;
+}
+
 [data-lexical-editor="true"] {
   height: 350px !important;
   overflow-y: auto !important;

@@ -158,9 +158,9 @@ export async function getQuestion(params: GetQuestionParams): Promise<ActionResp
   if (validationResult instanceof Error) {
     return handleError(validationResult) as ErrorResponse
   }
-
+  
   const { questionId } = params
-
+  
   try {
     const question = await Question.findById(questionId).populate("tags")
     if (!question) {
