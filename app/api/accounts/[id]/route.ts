@@ -48,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const validatedData = AccountSchema.partial().safeParse(body)
     if(!validatedData.success) throw new ValidationError(validatedData.error.flatten().fieldErrors)
 
-    const updatedAccount = await Account.findByIdAndUpdate(id, validatedData, { new: true })
+    const updatedAccount = await Account.findByIdAndUpdate(id, validatedData, { returnDocument: "after" })
     if (!updatedAccount) throw new NotFoundError("Account")
 
     return NextResponse.json({ success: true, data: updatedAccount }, { status: 200 })

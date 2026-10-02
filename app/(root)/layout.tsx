@@ -1,4 +1,5 @@
 import LeftSidebar from "@/components/navigation/LeftSidebar"
+import RefreshOnHomeReturn from "@/components/navigation/RefreshOnHomeReturn"
 import Navbar from "@/components/navigation/navbar"
 import RightSidebar from "@/components/navigation/RightSidebar"
 import React from "react"
@@ -6,6 +7,7 @@ import React from "react"
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <main className="background-light850_dark100 relative">
+      <RefreshOnHomeReturn />
       <Navbar />
       <div className="flex">
         <LeftSidebar />

@@ -8,7 +8,9 @@ interface Props {
   question: Question
 }
 
-const QuestionCard = ({ question: { _id, createdAt, title, tags, author, upvotes, downvotes } }: Props) => {
+const QuestionCard = ({
+  question: { _id, createdAt, title, tags, author, upvotes, downvotes, views, answers },
+}: Props) => {
   return (
     <div className="card-wrapper rounded-[10px] p-9 sm:px-11">
       <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
@@ -50,14 +52,14 @@ const QuestionCard = ({ question: { _id, createdAt, title, tags, author, upvotes
           <Metric
             imgUrl="/icons/message.svg"
             alt="answers"
-            value={upvotes}
+            value={answers}
             title=" Answers"
             textStyles="small-medium text-dark400_light800"
           />
           <Metric
             imgUrl="/icons/eye.svg"
             alt="views"
-            value={upvotes}
+            value={views}
             title=" Views"
             textStyles="small-medium text-dark400_light800"
           />

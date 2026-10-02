@@ -1,6 +1,12 @@
 "use server"
 
-import { AskQuestionSchema, EditQuestionSchema, GetQuestionSchema, PaginatedSearchParamsSchema } from "../validations"
+import {
+  AskQuestionSchema,
+  EditQuestionSchema,
+  GetQuestionSchema,
+  IncrementViewsSchema,
+  PaginatedSearchParamsSchema,
+} from "../validations"
 import action from "../handlers/action"
 import handleError from "../handlers/error"
 import mongoose, { type QueryFilter } from "mongoose"
@@ -10,6 +16,8 @@ import User from "@/app/(root)/database/user.model"
 import type { ITagDoc } from "@/app/(root)/database/tag.model"
 import TagQuestion from "@/app/(root)/database/tag-question.model"
 import { defaultPageSize } from "@/constants"
+import ROUTES from "@/constants/routes"
+import { revalidatePath } from "next/cache"
 
 export async function createQuestion(params: CreateQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
@@ -41,7 +49,7 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
       const existingTag = await Tag.findOneAndUpdate(
         { name: { $regex: new RegExp(`^${escapedTag}$`, "i") } },
         { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
-        { upsert: true, new: true, session },
+        { upsert: true, returnDocument: "after", session },
       )
 
       tagIds.push(existingTag._id)
@@ -111,7 +119,7 @@ export async function editQuestion(params: EditQuestionParams): Promise<ActionRe
         const existingTag = await Tag.findOneAndUpdate(
           { name: { $regex: `^${escapedTag}$`, $options: "i" } },
           { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
-          { upsert: true, new: true, session },
+          { upsert: true, returnDocument: "after", session },
         )
 
         if (existingTag) {
@@ -129,9 +137,7 @@ export async function editQuestion(params: EditQuestionParams): Promise<ActionRe
       await Tag.updateMany({ _id: { $in: tagIdsToRemove } }, { $inc: { questions: -1 } }, { session })
       await TagQuestion.deleteMany({ tag: { $in: tagIdsToRemove }, question: questionId }, { session })
 
-      question.tags = question.tags.filter(
-        (tag) => !tagIdsToRemove.some((id) => id.equals(tag._id))
-      )
+      question.tags = question.tags.filter((tag) => !tagIdsToRemove.some((id) => id.equals(tag._id)))
     }
 
     if (newTagQuestionDocuments) await TagQuestion.insertMany(newTagQuestionDocuments, { session })
@@ -159,9 +165,9 @@ export async function getQuestion(params: GetQuestionParams): Promise<ActionResp
   if (validationResult instanceof Error) {
     return handleError(validationResult) as ErrorResponse
   }
-  
-  const { questionId } = params
-  
+
+  const { questionId } = validationResult.params!
+
   try {
     const question = await Question.findById(questionId)
       .populate("tags", "name")
@@ -233,6 +239,35 @@ export async function getQuestions(
       success: true,
       data: { questions: JSON.parse(JSON.stringify(questions)), isNext },
     }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}
+
+export async function incrementViews(params: IncrementViewsParams): Promise<ActionResponse<{ views: number }>> {
+  const validationResult = await action({
+    params,
+    schema: IncrementViewsSchema,
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const { questionId } = validationResult.params!
+
+  try {
+    const question = await Question.findByIdAndUpdate(
+      questionId,
+      { $inc: { views: 1 } },
+      { returnDocument: "after", select: "views" },
+    )
+
+    if (!question) {
+      throw new Error("Question not found")
+    }
+
+    return { success: true, data: { views: question.views } }
   } catch (error) {
     return handleError(error) as ErrorResponse
   }
