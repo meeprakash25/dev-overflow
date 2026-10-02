@@ -1,5 +1,6 @@
 import Preview from "@/components/cards/Preview"
 import TagCard from "@/components/cards/TagCard"
+import AnswerForm from "@/components/forms/AnswerForm"
 import Metric from "@/components/ui/Metric"
 import UserAvatar from "@/components/UserAvatar"
 import ROUTES from "@/constants/routes"
@@ -25,7 +26,7 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
 
   if (!success || !question) return redirect("/404")
 
-  const { author, createdAt, answers, views, tags, content, title } = question
+  const { _id, author, createdAt, answers, views, tags, content, title } = question
 
   return (
     <>
@@ -78,6 +79,10 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
           <TagCard key={tag._id} _id={tag._id as string} name={tag.name} compact/>
         ))}
       </div>
+
+      <section className="my-5">
+        <AnswerForm questionId={_id} />
+      </section>
     </>
   )
 }
