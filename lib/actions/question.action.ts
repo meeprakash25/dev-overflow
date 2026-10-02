@@ -6,6 +6,7 @@ import handleError from "../handlers/error"
 import mongoose, { type QueryFilter } from "mongoose"
 import Question, { IQuestionDoc } from "@/app/(root)/database/question.model"
 import Tag from "@/app/(root)/database/tag.model"
+import User from "@/app/(root)/database/user.model"
 import type { ITagDoc } from "@/app/(root)/database/tag.model"
 import TagQuestion from "@/app/(root)/database/tag-question.model"
 import { defaultPageSize } from "@/constants"
@@ -162,7 +163,9 @@ export async function getQuestion(params: GetQuestionParams): Promise<ActionResp
   const { questionId } = params
   
   try {
-    const question = await Question.findById(questionId).populate("tags")
+    const question = await Question.findById(questionId)
+      .populate("tags", "name")
+      .populate({ path: "author", model: User, select: "_id, name image" })
     if (!question) {
       throw new Error("Question not found")
     }
@@ -219,7 +222,7 @@ export async function getQuestions(
     const totalQuestions = await Question.countDocuments(filterQuery)
     const questions = await Question.find(filterQuery)
       .populate("tags", "name")
-      .populate("author", "name image")
+      .populate({ path: "author", model: User, select: "name image" })
       .lean()
       .sort(sortCriteria)
       .skip(skip)
