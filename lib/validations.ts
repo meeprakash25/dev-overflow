@@ -101,6 +101,9 @@ export const IncrementViewsSchema = z.object({
 
 export const AnswerSchema = z.object({
   content: z.string("Content must be a string").min(30, "Content must be at least 30 characters long"),
+})
+
+export const AnswerServerSchema = AnswerSchema.extend({
   questionId: z.string("Question Id must be a string").min(1, "Question Id is required"),
 })
 

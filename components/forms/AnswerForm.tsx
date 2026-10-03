@@ -1,43 +1,62 @@
 "use client"
 
-import { Controller, DefaultValues, FieldValues, SubmitHandler, useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Field, FieldError } from "@/components/ui/field"
 import { toast } from "../ui/toast"
-import { useRouter } from "next/navigation"
-import { useRef, useState } from "react"
+import { useRef, useState, useTransition } from "react"
 import { AnswerSchema } from "@/lib/validations"
 import dynamic from "next/dynamic"
 import { MDXEditorMethods } from "@mdxeditor/editor"
 import { ReloadIcon } from "@radix-ui/react-icons"
 import Image from "next/image"
+import { createAnswer } from "@/lib/actions/answer.action"
 
 const Editor = dynamic(() => import("@/components/editor"), {
   ssr: false,
 })
 
-interface AuthFormProps<T extends FieldValues> {
-  content?: string
-  questionId?: string
+interface AnswerFormProps {
+  questionId: string
+  // content: string
 }
 
-const AnswerForm = <T extends FieldValues>({ content, questionId }: AuthFormProps<T>) => {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+const AnswerForm = ({ questionId }: AnswerFormProps) => {
+  const [isAnswering, startAnsweringTransition] = useTransition()
   const [isAISubmitting, setIsAISubmitting] = useState(false)
+  const [editorResetKey, setEditorResetKey] = useState(0)
 
   const editorRef = useRef<MDXEditorMethods>(null)
 
-  const router = useRouter()
   const form = useForm<z.infer<typeof AnswerSchema>>({
     resolver: zodResolver(AnswerSchema),
-    defaultValues: { content: content || "", questionId: questionId || "" },
+    defaultValues: { content: "" },
   })
 
-  const handleSubmit: SubmitHandler<z.infer<typeof AnswerSchema>> = async (values) => {
-    console.log("Values:", values)
+  const handleSubmit = async (values: z.infer<typeof AnswerSchema>) => {
+    startAnsweringTransition(async () => {
+      const result = await createAnswer({
+        questionId,
+        content: values.content,
+      })
+      if (result.success) {
+        form.reset()
+        setEditorResetKey((key) => key + 1)
+        toast.add({
+          title: "Success",
+          description: "Answer posted successfully",
+          type: "success",
+        })
+      } else {
+        toast.add({
+          title: "Error",
+          description: result.error?.message || "Something went wrong",
+          type: "error",
+        })
+      }
+    })
   }
 
   return (
@@ -63,7 +82,7 @@ const AnswerForm = <T extends FieldValues>({ content, questionId }: AuthFormProp
         control={form.control}
         render={({ field, fieldState }) => (
           <Field className="flex-w-full flex-col gap-2" data-invalid={fieldState.invalid ? "true" : undefined}>
-            <Editor value={field.value} fieldChange={field.onChange} editorRef={editorRef} />
+            <Editor key={editorResetKey} value={field.value} fieldChange={field.onChange} editorRef={editorRef} />
             <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
         )}
@@ -73,8 +92,8 @@ const AnswerForm = <T extends FieldValues>({ content, questionId }: AuthFormProp
         <Button
           type="submit"
           className="primary-gradient paragraph-medium min-h-10 rounded-2 px-4 py-2 font-inter text-light-900!"
-          disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Posting..." : "Post Answer"}
+          disabled={isAnswering}>
+          {isAnswering ? "Posting..." : "Post Answer"}
         </Button>
       </div>
     </form>
