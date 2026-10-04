@@ -1,9 +1,12 @@
+import AllAnswers from "@/components/answers/AllAnswers"
 import Preview from "@/components/cards/Preview"
 import TagCard from "@/components/cards/TagCard"
 import AnswerForm from "@/components/forms/AnswerForm"
 import Metric from "@/components/ui/Metric"
 import UserAvatar from "@/components/UserAvatar"
+import { defaultPageSize } from "@/constants"
 import ROUTES from "@/constants/routes"
+import { getAnswers } from "@/lib/actions/answer.action"
 import { getQuestion, incrementViews } from "@/lib/actions/question.action"
 import { formatNumber, getTimeStamp } from "@/lib/utils"
 import Link from "next/link"
@@ -26,8 +29,23 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
 
   if (!success || !question) return redirect("/404")
 
+  const {
+    success: areAnswersLoaded,
+    data: answersResult,
+    error: answersError,
+  } = await getAnswers({
+    questionId: id,
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || defaultPageSize,
+    filter: filter,
+  })
+
+  // console.log("Answers: ", answersResult)
+
   const { _id, author, createdAt, answers, views, tags, content, title } = question
 
+  // console.log("Answers: ", answersResult)
+  
   return (
     <>
       <div className="flex-start w-full flex-col">
@@ -79,6 +97,15 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
           <TagCard key={tag._id} _id={tag._id as string} name={tag.name} compact/>
         ))}
       </div>
+
+      <section className="my-5">
+        <AllAnswers
+          data={ answersResult?.answers || [] }
+          success={ areAnswersLoaded }
+          error={ answersError }
+          totalAnswers={ answersResult?.totalAnswers || 0 }
+        />
+      </section>
 
       <section className="my-5">
         <AnswerForm questionId={question._id} />

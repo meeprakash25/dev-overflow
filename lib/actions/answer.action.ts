@@ -3,11 +3,12 @@
 import Question from "@/app/(root)/database/question.model"
 import action from "../handlers/action"
 import handleError from "../handlers/error"
-import { AnswerServerSchema } from "../validations"
+import { AnswerServerSchema, GetAnswersSchema } from "../validations"
 import mongoose from "mongoose"
 import Answer, { IAnswerDoc } from "@/app/(root)/database/answer.model"
 import ROUTES from "@/constants/routes"
 import { revalidatePath } from "next/cache"
+import { defaultPageSize } from "@/constants"
 
 export async function createAnswer(params: CreateAnswerParams): Promise<ActionResponse<IAnswerDoc>> {
   const validationResult = await action({
@@ -57,5 +58,58 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
     return handleError(error) as ErrorResponse
   } finally {
     session.endSession()
+  }
+}
+
+export async function getAnswers(params: GetAnswersParams): Promise<ActionResponse<{answers: Answer[], isNext: boolean, totalAnswers: number}>> {
+  const validationResult = await action({
+    params,
+    schema: GetAnswersSchema,
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const { questionId, page = 1, pageSize = defaultPageSize, filter="newest" } = validationResult.params!
+  const skip = (Number(page - 1)) * pageSize
+  const limit = pageSize
+
+  let sortCriteria = {}
+
+  switch (filter) {
+    case "newest":
+      sortCriteria = { createdAt: -1 }
+      break
+    case "oldest":
+      sortCriteria = { createdAt: 1 }
+      break
+    case "popular":
+      sortCriteria = { upvotes: -1 }
+      break
+    default:
+      sortCriteria = { createdAt: -1 }
+  }
+
+  try {
+    const totalAnswers = await Answer.countDocuments({ question: questionId })
+    const answers = await Answer.find({ question: questionId })
+      .populate({ path: "author", model: "User", select: "_id name image" })
+      .sort(sortCriteria)
+      .skip(skip)
+      .limit(limit)
+
+    const isNext = totalAnswers > page + answers.length
+
+    return {
+      success: true,
+      data: {
+        answers: JSON.parse(JSON.stringify(answers)),
+        isNext,
+        totalAnswers
+      }
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
   }
 }
