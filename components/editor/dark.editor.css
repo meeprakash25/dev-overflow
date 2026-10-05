@@ -1,6 +1,18 @@
 @import url("@radix-ui/colors/tomato-dark.css");
 @import url("@radix-ui/colors/mauve-dark.css");
 
+.markdown-editor table > tbody > tr > td,
+.markdown-editor table > tbody > tr > th {
+  padding-block: 0 !important;
+  line-height: 1.2 !important;
+  vertical-align: middle;
+}
+
+.markdown-editor table > tbody > tr > td [contenteditable="true"],
+.markdown-editor table > tbody > tr > th [contenteditable="true"] {
+  line-height: 1.2 !important;
+}
+
 .dark .dark-editor {
   --accentBase: var(--tomato-1);
   --accentBgSubtle: var(--tomato-2);

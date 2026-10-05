@@ -490,7 +490,7 @@ a, button {
   cursor: pointer;
 }
 
-[data-lexical-editor="true"] {
+.mdxeditor-root-contenteditable > .mdxeditor-contenteditable-wrapper > [data-lexical-editor="true"] {
   height: 350px !important;
   overflow-y: auto !important;
 }
