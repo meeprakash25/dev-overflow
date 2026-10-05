@@ -38,16 +38,16 @@ export async function POST(req: Request) {
             role: "user",
             content: `Write a clear, concise answer to the following question using the provided context.
 
-Question:
-${question}
+            Question:
+            ${question}
 
-Context:
-${content}
+            Context:
+            ${content}
 
-User's draft answer:
-${userAnswer?.trim() || "No draft answer was provided."}
+            User's draft answer:
+            ${userAnswer?.trim() || "No draft answer was provided."}
 
-Use the draft only when it is correct. Correct or complete it when needed, and return the final answer in Markdown.`,
+            Use the draft only when it is correct. Correct or complete it when needed, and return the final answer in Markdown.`,
           },
         ],
       }),
