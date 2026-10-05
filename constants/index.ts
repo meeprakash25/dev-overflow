@@ -37,3 +37,5 @@ export const sideBarLinks = [
 ]
 
 export const defaultPageSize = 10
+
+export const maxRequestTimeout = 100000

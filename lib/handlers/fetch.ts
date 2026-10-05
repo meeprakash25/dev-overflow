@@ -1,6 +1,7 @@
 import logger from "../logger"
 import handleError from "./error"
 import { RequestError } from "../http-errors"
+import { maxRequestTimeout } from "@/constants"
 
 interface FetchOptions extends RequestInit {
   timeout?: number
@@ -11,7 +12,7 @@ function isError(error: unknown): error is Error {
 }
 
 export async function fetchHandler<T>(url: string, options: FetchOptions = {}): Promise<ActionResponse<T>> {
-  const { timeout = 5000, headers: customHeaders = {}, ...restOptions } = options
+  const { timeout = maxRequestTimeout, headers: customHeaders = {}, ...restOptions } = options
 
   const controller = new AbortController()
   const id = setTimeout(() => controller.abort(), timeout)
