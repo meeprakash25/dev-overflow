@@ -92,7 +92,6 @@ export const PaginatedSearchParamsSchema = z.object({
 
 export const GetTagQuestionsSchema = PaginatedSearchParamsSchema.extend({
   tagId: z.string("Tag Id must be a string").min(1, "Tag Id is required"),
-  
 })
 
 export const IncrementViewsSchema = z.object({
@@ -115,4 +114,14 @@ export const AIAnswerSchema = z.object({
   question: z.string("Question must be a string").min(1, "Question is required"),
   content: z.string("Content must be a string").min(30, "Content must be at least 30 characters long"),
   userAnswer: z.string("Content must be a string").optional(),
+})
+
+export const CreateVoteSchema = z.object({
+  targetId: z.string("Target ID must be a string").min(1, "Target ID is required"),
+  targetType: z.enum(["question", "answer"], "Invalid target type"),
+  voteType: z.enum(["upvote", "downvote"], "Invalid vote type"),
+})
+
+export const UpdateVoteCountSchema = CreateVoteSchema.extend({
+  change: z.union([z.literal(-1), z.literal(1)]),
 })

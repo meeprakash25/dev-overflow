@@ -1,3 +1,5 @@
+"use server"
+
 import { defaultPageSize } from "@/constants"
 import handleError from "../handlers/error"
 import { GetTagQuestionsSchema, PaginatedSearchParamsSchema } from "../validations"
