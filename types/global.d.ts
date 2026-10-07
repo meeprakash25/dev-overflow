@@ -1,3 +1,4 @@
+
 type SuccessResponse<T = null> = ActionResponse<T> & { success: true }
 type ErrorResponse<T = null> = ActionResponse<undefined> & { false: true }
 
@@ -57,4 +58,13 @@ interface PaginatedSearchParams {
   query?: string
   filter?: string
   sort?: string
+}
+
+interface Answer {
+  _id: string
+  author: Author
+  content: string
+  createdAt: Date
+  upvotes: number
+  downvotes: number
 }
