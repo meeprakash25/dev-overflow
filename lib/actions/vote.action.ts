@@ -5,11 +5,12 @@ import action from "../handlers/action"
 import handleError from "../handlers/error"
 import { CreateVoteSchema, HasVotedSchema, UpdateVoteCountSchema } from "../validations"
 import mongoose, { ClientSession } from "mongoose"
-import { z } from "zod"
 import Question from "@/app/(root)/database/question.model"
 import Answer from "@/app/(root)/database/answer.model"
+import { revalidatePath } from "next/cache"
+import ROUTES from "@/constants/routes"
 
-async function updateVoteCount(params: UpdateVoteCountParams, session: ClientSession): Promise<ActionResponse> {
+async function updateVoteCount(params: UpdateVoteCountParams, session: ClientSession): Promise<void> {
   const validationResult = await action({
     params,
     schema: UpdateVoteCountSchema,
@@ -17,31 +18,24 @@ async function updateVoteCount(params: UpdateVoteCountParams, session: ClientSes
   })
 
   if (validationResult instanceof Error) {
-    return handleError(validationResult) as ErrorResponse
+    throw validationResult
   }
 
   const { targetId, targetType, voteType, change } = validationResult.params!
 
   const voteField = voteType === "upvote" ? "upvotes" : "downvotes"
 
-  try {
-    const update = { $inc: { [voteField]: change } }
-    const result =
-      targetType === "question" ?
-        await Question.findByIdAndUpdate(targetId, update, { new: true, session })
-      : await Answer.findByIdAndUpdate(targetId, update, { new: true, session })
+  const update = { $inc: { [voteField]: change } }
+  const result =
+    targetType === "question" ?
+      await Question.findByIdAndUpdate(targetId, update, { new: true, session })
+    : await Answer.findByIdAndUpdate(targetId, update, { new: true, session })
 
-    if (!result) {
-      return handleError("Failed to update vote count") as ErrorResponse
-    }
-
-    return { success: true }
-  } catch (error) {
-    return handleError(error) as ErrorResponse
-  }
+  if (!result) throw new Error("Failed to update vote count")
 }
 
 export async function createVote(params: CreateVoteParams): Promise<ActionResponse> {
+
   const validationResult = await action({
     params,
     schema: CreateVoteSchema,
@@ -56,16 +50,16 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
 
   const userId = validationResult.session?.user?.id
 
-  if (!userId) handleError(new Error("Unauthorized")) as ErrorResponse
+  if (!userId) return handleError(new Error("Unauthorized")) as ErrorResponse
 
   const session = await mongoose.startSession()
   session.startTransaction()
 
   try {
     const existingVote = await Vote.findOne({
-      authorId: userId,
-      actionId: targetId,
-      actionType: targetType,
+      author: userId,
+      targetId,
+      targetType,
     }).session(session)
 
     if (existingVote) {
@@ -76,13 +70,19 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
       } else {
         // if the user has already voted with a different voteType, update the vote
         await Vote.findByIdAndUpdate(existingVote._id, { voteType }, { new: true, session })
-        await updateVoteCount({ targetId, targetType, voteType, change: -1 }, session)
+        await updateVoteCount({ targetId, targetType, voteType: existingVote.voteType, change: -1 }, session)
+        await updateVoteCount({ targetId, targetType, voteType, change: 1 }, session)
       }
     } else {
       // if the user has not voted yet, create a new vote
-      await Vote.create({ actionId: targetId, targetType, voteType, change: 1 }, session)
-      await updateVoteCount({ targetId, targetType, voteType, change: -1 }, session)
+      await Vote.create([{ author: userId, targetId, targetType, voteType }], { session })
+      await updateVoteCount({ targetId, targetType, voteType, change: 1 }, session)
     }
+
+    await session.commitTransaction()
+
+    revalidatePath(ROUTES.QUESTION(targetId))
+    return { success: true }
   } catch (error) {
     if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
@@ -110,8 +110,8 @@ export async function hasVoted(
   try {
     const vote = await Vote.findOne({
       author: userId,
-      actionId: targetId,
-      actionType: targetType
+      targetId,
+      targetType
     })
 
     if (!vote) {
@@ -128,7 +128,7 @@ export async function hasVoted(
         hasDownvoted: vote.voteType === "downvote"
       }
     }
-    
+
   } catch (error) {
     return handleError(error) as ErrorResponse
   }
