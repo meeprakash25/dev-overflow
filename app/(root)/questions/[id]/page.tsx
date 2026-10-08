@@ -2,6 +2,7 @@ import AllAnswers from "@/components/answers/AllAnswers"
 import Preview from "@/components/cards/Preview"
 import TagCard from "@/components/cards/TagCard"
 import AnswerForm from "@/components/forms/AnswerForm"
+import SaveQuestion from "@/components/questions/SaveQuestion"
 import Metric from "@/components/ui/Metric"
 import UserAvatar from "@/components/UserAvatar"
 import Votes from "@/components/votes/Votes"
@@ -44,11 +45,9 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
   })
 
   const hasVotedPromise = hasVoted({ targetId: question._id, targetType: "question" })
-
-  const { _id, author, createdAt, answers, views, tags, content, title } = question
-
-  // console.log("Answers: ", answersResult)
   
+  const { _id, author, createdAt, answers, views, tags, content, title } = question
+    
   return (
     <>
       <div className="flex-start w-full flex-col">
@@ -73,6 +72,11 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
                 targetType="question"
                 targetId={question._id}
                 hasVotedPromise={hasVotedPromise}
+              />
+            </Suspense>
+            <Suspense fallback={<div>Loading...</div>}>
+              <SaveQuestion
+                questionId={question._id}
               />
             </Suspense>
           </div>
