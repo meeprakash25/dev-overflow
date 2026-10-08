@@ -54,3 +54,12 @@ export const EMPTY_USERS = {
   title: "No Users Found",
   message: "You're ALONE. The only one here. More uses are coming soon!",
 }
+
+export const EMPTY_COMMUNITY = {
+  title: "The Community Is Empty",
+  message: "No one has joined the community yet. Sign up and be among the first to connect with other developers.",
+  button: {
+    text: "Join the Community",
+    href: ROUTES.SIGN_UP,
+  },
+}
