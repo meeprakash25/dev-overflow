@@ -2,13 +2,24 @@
 
 import { useSession } from "next-auth/react"
 import Image from "next/image"
-import { useState } from "react"
+import { use, useState } from "react"
 import { toast } from "../ui/toast"
-import { toggleSavedQuestion } from "@/lib/actions/collection.action"
+import { toggleSaveQuestion } from "@/lib/actions/collection.action"
+import { boolean } from "zod"
 
-const SaveQuestion = ({ questionId }: { questionId: string }) => {
+const SaveQuestion = ({
+  questionId,
+  hasSavedQuestionPromise,
+}: {
+  questionId: string
+  hasSavedQuestionPromise: Promise<ActionResponse<{ saved: boolean }>>
+}) => {
   const session = useSession()
   const userId = session?.data?.user?.id
+
+  const { data } = use(hasSavedQuestionPromise)
+
+  const { saved: hasSaved } = data || {}
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -24,7 +35,7 @@ const SaveQuestion = ({ questionId }: { questionId: string }) => {
     setIsLoading(true)
 
     try {
-      const { success, data, error } = await toggleSavedQuestion({ questionId })
+      const { success, data, error } = await toggleSaveQuestion({ questionId })
       if (!success) throw new Error(error?.message || "An error occured")
 
       toast.add({
@@ -41,8 +52,6 @@ const SaveQuestion = ({ questionId }: { questionId: string }) => {
       setIsLoading(false)
     }
   }
-
-  const hasSaved = false
 
   return (
     <Image
