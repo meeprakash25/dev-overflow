@@ -8,7 +8,7 @@ export const HomeFilters = [
 
 export const AnswerFilters = [
   { name: "Select a filter", value: "" },
-  { name: "Newest", value: "latest" },
+  { name: "Newest", value: "newest" },
   { name: "Oldest", value: "oldest" },
   { name: "Popular", value: "popular" },
 ]
@@ -24,7 +24,7 @@ export const CollectionFilters = [
 
 export const TagFilters = [
   { name: "Select a filter", value: "" },
-  { name: "A-Z", value: "name" },
+  { name: "Name A-Z", value: "name" },
   { name: "Recent", value: "recent" },
   { name: "Oldest", value: "oldest" },
   { name: "Popular", value: "popular" },

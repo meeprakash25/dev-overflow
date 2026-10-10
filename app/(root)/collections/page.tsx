@@ -5,6 +5,8 @@ import { defaultPageSize } from "@/constants"
 import DataRenderer from "@/components/DataRenderer"
 import { EMPTY_QUESTION } from "@/constants/states"
 import { getSavedQuestions } from "@/lib/actions/collection.action"
+import CommonFilter from "@/components/filters/CommonFilter"
+import { CollectionFilters } from "@/constants/filters"
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>
@@ -26,7 +28,13 @@ const Collections = async ({ searchParams }: SearchParams) => {
     <>
       <h1 className="h1-bold text-dark100_light900">Saved Questions</h1>
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
-        <LocalSearch route={ROUTES.COLLECTION} imgSrc="/icons/search.svg" placeholder="Search Saved Questions..." otherClasses="" />
+        <LocalSearch
+          route={ROUTES.COLLECTION}
+          imgSrc="/icons/search.svg"
+          placeholder="Search Saved Questions..."
+          otherClasses=""
+        />
+        <CommonFilter filters={CollectionFilters} otherClasses="min-h-[56px] sm:min-w-[170px] w-full" />
       </div>
 
       <DataRenderer

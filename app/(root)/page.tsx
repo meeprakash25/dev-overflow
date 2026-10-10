@@ -40,7 +40,6 @@ const Home = async ({ searchParams }: SearchParams) => {
         <CommonFilter
           filters={ HomeFilters }
           otherClasses="min-h-[56px] sm:min-w-[170px] w-full"
-          containerClasses="hidden max-md:flex"
         />
       </section>
       

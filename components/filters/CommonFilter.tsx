@@ -12,8 +12,8 @@ interface Filter {
 
 interface Props {
   filters: Filter[]
-  otherClasses: string
-  containerClasses: string
+  otherClasses?: string
+  containerClasses?: string
 }
 
 const CommonFilter = ({ filters, otherClasses = "", containerClasses = "" }: Props) => {
