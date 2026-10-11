@@ -132,5 +132,9 @@ export const HasVotedSchema = CreateVoteSchema.pick({
 })
 
 export const CollectionBaseSchema = z.object({
-  questionId: z.string().min(1, "Question ID is required")
+  questionId: z.string("Question Id must be a string").min(1, "Question Id is required")
+})
+
+export const GetUserSchema = z.object({
+  userId: z.string("User Id must be a string").min(1, "User Id is required")
 })
