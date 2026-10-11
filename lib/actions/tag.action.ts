@@ -75,7 +75,7 @@ export const getTagQuestions = async (
     return handleError(validationResult) as ErrorResponse
   }
 
-  const { page = 1, pageSize = defaultPageSize, query, tagId } = params
+  const { page = 1, pageSize = defaultPageSize, query, tagId, filter } = params
   const skip = (Number(page) - 1) * pageSize
   const limit = Number(pageSize)
 
@@ -83,9 +83,39 @@ export const getTagQuestions = async (
     const tag = await Tag.findById(tagId)
     if (!tag) throw new Error("Tag not found")
 
+    if (filter === "recommended") {
+      return {
+        success: true,
+        data: {
+          tag: JSON.parse(JSON.stringify(tag)),
+          questions: [],
+          isNext: false,
+        },
+      }
+    }
+
     const filterQuery: QueryFilter<typeof Question> = { tags: { $in: [tagId] } }
+    
     if (query) {
-      filterQuery.title = { $regex: query, $options: "1" }
+      filterQuery.$or = [{ title: { $regex: new RegExp(query, "i") } }, { content: { $regex: new RegExp(query, "i") } }]
+    }
+
+    let sortCriteria = {}
+
+    switch (filter) {
+      case "newest":
+        sortCriteria = { createdAt: -1 }
+        break
+      case "unanswered":
+        filterQuery.answers = 0
+        sortCriteria = { createdAt: -1 }
+        break
+      case "popular":
+        sortCriteria = { upvotes: -1 }
+        break
+      default:
+        sortCriteria = { createdAt: -1 }
+        break
     }
 
     const totalQuestions = await Question.countDocuments(filterQuery)
@@ -95,6 +125,7 @@ export const getTagQuestions = async (
         { path: "author", select: "name image" },
         { path: "tags", select: "name" },
       ])
+      .sort(sortCriteria)
       .skip(skip)
       .limit(limit)
     const isNext = totalQuestions > skip + questions.length
