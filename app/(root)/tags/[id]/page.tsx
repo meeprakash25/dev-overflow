@@ -9,10 +9,6 @@ import { TagFilters } from "@/constants/filters"
 import Pagination from "@/components/Pagination"
 import { getTagQuestions } from "@/lib/actions/tag.action"
 
-interface SearchParams {
-  searchParams: Promise<{ [key: string]: string }>
-}
-
 const TagQuestions = async ({ params, searchParams }: RouteParams) => {
   const { id } = await params
   const { page, pageSize, query, filter } = await searchParams
