@@ -6,29 +6,12 @@ import { getHotQuestions } from "@/lib/actions/question.action"
 import DataRenderer from "../DataRenderer"
 import { getTopTags } from "@/lib/actions/tag.action"
 
-// const hotQuestions = [
-//   { _id: "1", title: "How to use github copilot?" },
-//   { _id: "2", title: "How to use React Query?" },
-//   { _id: "3", title: "How to use Redux?" },
-//   { _id: "4", title: "How to use React ROuter?" },
-//   { _id: "5", title: "How to use React Context?" },
-//   { _id: "6", title: "How to use git?" },
-//   { _id: "7", title: "What is github copilot?" },
-// ]
-
-const popularTags = [
- { _id: "1", name: "React", questions: 120 },
- { _id: "2", name: "JavaScript", questions: 95 },
- { _id: "3", name: "TypeScript", questions: 80 },
- { _id: "4", name: "Next.js", questions: 70 },
- { _id: "5", name: "Node.js", questions: 60 },
- { _id: "6", name: "CSS", questions: 50 },
-]
-
 const RightSidebar = async () => {
-  const { success, data: hotQuestions, error } = await getHotQuestions()
-  const { success: tSuccess, data: popularTags, error: tError } = await getTopTags()
   
+  const [
+    { success, data: hotQuestions, error },
+    { success: tSuccess, data: popularTags, error: tError }
+  ] = await Promise.all([getHotQuestions(), getTopTags()])
   
   return (
     <section

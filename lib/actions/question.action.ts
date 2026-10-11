@@ -277,14 +277,11 @@ export async function incrementViews(params: IncrementViewsParams): Promise<Acti
 export async function getHotQuestions(): Promise<ActionResponse<Question[]>>{
   try {
     await dbConnect()
+    const questions = await Question.find().sort({ views: -1, upvotes: -1 }).limit(5)
 
-    const questions = await Question.find()
-      .sort({ views: -1, upvotes: -1 })
-      .limit(5)
-    
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(questions))
+      data: JSON.parse(JSON.stringify(questions)),
     }
   } catch (error) {
     return handleError(error) as ErrorResponse
