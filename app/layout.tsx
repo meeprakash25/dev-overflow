@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toast"
 import { SessionProvider } from "next-auth/react"
 import { auth } from "@/auth"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -50,7 +51,7 @@ const RootLayout = async ({
       <SessionProvider session={session}>
         <body className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`} suppressHydrationWarning>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            {children}
+            <TooltipProvider>{children}</TooltipProvider>
           </ThemeProvider>
         </body>
         <Toaster />
