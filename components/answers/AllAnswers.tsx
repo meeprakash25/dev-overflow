@@ -18,7 +18,7 @@ const AllAnswers = ({ page, isNext, data, success, error, totalAnswers }: Props)
         <h3 className="primary-text-gradient">
           {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
         </h3>
-        <CommonFilter filters={AnswerFilters} otherClasses="sm:min-w-[32]" containerClasses="max-xs:w-full" />
+        <CommonFilter filters={AnswerFilters} otherClasses="sm:min-w-[32]" containerClasses="" />
       </div>
 
       <DataRenderer
