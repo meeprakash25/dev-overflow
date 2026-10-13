@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "./ui/button"
 import { useRouter, useSearchParams } from "next/navigation"
 import { formUrlQuery } from "@/lib/url"
+import Image from "next/image"
 
 interface Props {
   page: number | undefined | string
@@ -22,33 +23,33 @@ const Pagination = ({ page = 1, isNext, containerClasses }: Props) => {
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       key: "page",
-      value: nextPageNumber.toString()
+      value: nextPageNumber.toString(),
     })
 
     router.push(newUrl)
   }
 
   return (
-    <div className={cn("flex w-full items-center justify-center gap-2 mt-5", containerClasses)}>
-      {Number(page) > 1 && (
-        <Button
-          onClick={() => handleNavigation("prev")}
-          className="light-border-2 btn flex min-h-[36px] items-center justify-center gap-2 border">
-          <p className="body-medium text-dark200_light800">Prev</p>
-        </Button>
-      )}
+    <div className={cn("flex w-full items-center justify-center gap-2 mt-5 text-light-900", containerClasses)}>
+      <Button
+        disabled={Number(page) <= 1}
+        onClick={() => handleNavigation("prev")}
+        className="light-border-2 btn flex min-h-[36px] items-center justify-center gap-2 border">
+        <Image src="/icons/chevron-left.svg" alt="Chevron" width={20} height={20} className="invert-colors" />
+        <p className="body-medium text-dark200_light800">Prev</p>
+      </Button>
 
       <div className="flex flex-center justify-center rounded-md bg-primary-500 px-3 5 py-2">
         <p className="body-medium">{page}</p>
       </div>
 
-      {isNext && (
-        <Button
-          onClick={() => handleNavigation("next")}
-          className="light-border-2 btn flex min-h-[36px] items-center justify-center gap-2 border">
-          <p className="body-medium text-dark200_light800">Next</p>
-        </Button>
-      )}
+      <Button
+        disabled={!isNext}
+        onClick={() => handleNavigation("next")}
+        className="light-border-2 btn flex min-h-[36px] items-center justify-center gap-2 border">
+        <p className="body-medium text-dark200_light800">Next</p>
+        <Image src="/icons/chevron-right.svg" alt="Chevron" width={20} height={20} className="invert-colors" />
+      </Button>
     </div>
   )
 }
