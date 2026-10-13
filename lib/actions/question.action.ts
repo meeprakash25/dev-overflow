@@ -2,6 +2,7 @@
 
 import {
   AskQuestionSchema,
+  DeleteQuestionSchema,
   EditQuestionSchema,
   GetQuestionSchema,
   IncrementViewsSchema,
@@ -19,6 +20,9 @@ import { defaultPageSize } from "@/constants"
 import ROUTES from "@/constants/routes"
 import { revalidatePath } from "next/cache"
 import dbConnect from "../mongoose"
+import Answer, { type IAnswerDoc } from "@/app/(root)/database/answer.model"
+import Collection from "@/app/(root)/database/collection.model"
+import Vote from "@/app/(root)/database/vote.model"
 
 export async function createQuestion(params: CreateQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
@@ -274,7 +278,7 @@ export async function incrementViews(params: IncrementViewsParams): Promise<Acti
   }
 }
 
-export async function getHotQuestions(): Promise<ActionResponse<Question[]>>{
+export async function getHotQuestions(): Promise<ActionResponse> {
   try {
     await dbConnect()
     const questions = await Question.find().sort({ views: -1, upvotes: -1 }).limit(5)
@@ -285,5 +289,72 @@ export async function getHotQuestions(): Promise<ActionResponse<Question[]>>{
     }
   } catch (error) {
     return handleError(error) as ErrorResponse
+  }
+}
+
+export async function deleteQuestion(params: DeleteQuestionParams): Promise<ActionResponse<IAnswerDoc[]>> {
+  const validationResult = await action({
+    params,
+    schema: DeleteQuestionSchema,
+    authorize: true, // only authorized user can delete question
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const loggedInUser = validationResult?.session?.user
+
+  const { questionId } = validationResult.params!
+
+  const session = await mongoose.startSession()
+  session.startTransaction()
+
+  try {
+    const question = await Question.findById(questionId).session(session)
+    if (!question) {
+      throw new Error("Question not found")
+    }
+
+    if (question.author._id.toString() !== loggedInUser?.id) {
+      throw new Error("You are not authorized to delete this question.")
+    }
+
+    // delete the related data and delete
+    const answers = await Answer.find({ question: questionId }).session(session)
+
+    if (answers.length > 0) {
+      await Answer.deleteMany({ question: questionId }).session(session)
+      await Vote.deleteMany({
+        targetType: "answer",
+        targetId: {$in: answers.map((answer) => answer.id)}
+      }).session(session)
+    }
+
+    await Collection.deleteOne({ question: questionId }).session(session)
+    await TagQuestion.deleteMany({ question: questionId }).session(session)
+    await Vote.deleteMany({ targetType: "question", targetId: questionId }).session(session)
+
+    // For all tags of question, find them and reduce their count
+    if (question.tags.length > 0) {
+      await Tag.updateMany(
+        { _id: { $in: question.tags } },
+        { $inc: { questions: -1 } },
+        { session }
+      )
+    }
+
+    await question.deleteOne().session(session)
+
+    await session.commitTransaction()
+
+    revalidatePath(ROUTES.PROFILE(loggedInUser?.id))
+
+    return { success: true, data: JSON.parse(JSON.stringify(answers)) }
+  } catch (error) {
+    if (session.inTransaction()) await session.abortTransaction()
+    return handleError(error) as ErrorResponse
+  } finally {
+    await session.endSession()
   }
 }

@@ -144,8 +144,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
                 </div>
               )}
             />
-
-            <Pagination page={page} isNext={hasMoreQuestions} />
+            {questions && questions.length > 0 && <Pagination page={page} isNext={hasMoreQuestions} />}
           </TabsContent>
           <TabsContent value="answers" className="mt-5 w-full flex-col gap-6">
             <DataRenderer
@@ -168,7 +167,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
               )}
             />
 
-            <Pagination page={page} isNext={hasMoreAnswers} />
+            {answers && answers.length > 0 && <Pagination page={page} isNext={hasMoreAnswers} />}
           </TabsContent>
         </Tabs>
 

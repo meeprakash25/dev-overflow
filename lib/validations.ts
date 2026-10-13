@@ -112,7 +112,7 @@ export const GetAnswersSchema = PaginatedSearchParamsSchema.extend({
 
 export const AIAnswerSchema = z.object({
   question: z.string("Question must be a string").min(1, "Question is required"),
-  content: z.string("Content must be a string").min(30, "Content must be at least 30 characters long"),
+  content: z.string("Content must be a string").min(1, "Content is required"),
   userAnswer: z.string("Content must be a string").optional(),
 })
 
@@ -149,4 +149,12 @@ export const GetUserAnswersSchema = PaginatedSearchParamsSchema.extend({
 
 export const GetUserTagsSchema = z.object({
   userId: z.string("User Id must be a string").min(1, "User Id is required"),
+})
+
+export const DeleteQuestionSchema = z.object({
+  questionId: z.string("Question Id must be a string").min(1, "Question Id is required"),
+})
+
+export const DeleteAnswerSchema = z.object({
+  answerId: z.string("Answer Id must be a string").min(1, "Answer Id is required"),
 })

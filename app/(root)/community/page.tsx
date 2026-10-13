@@ -49,7 +49,8 @@ const Community = async ({ searchParams }: RouteParams) => {
           </div>
         )}
       />
-      <Pagination page={page} isNext={isNext || false} />
+
+      {users && users.length > 0 && <Pagination page={page} isNext={isNext || false} />}
     </div>
   )
 }

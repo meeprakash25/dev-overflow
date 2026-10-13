@@ -29,7 +29,7 @@ const AllAnswers = ({ page, isNext, data, success, error, totalAnswers }: Props)
         render={(answers) => answers.map((answer) => <AnswerCard key={String(answer._id)} {...answer} />)}
       />
 
-      <Pagination page={page} isNext={isNext || false} />
+      {totalAnswers > 0 && <Pagination page={page} isNext={isNext || false} />}
     </div>
   )
 }

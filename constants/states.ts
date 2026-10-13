@@ -30,10 +30,6 @@ export const EMPTY_QUESTION = {
 export const EMPTY_TAGS = {
   title: "No Tags Found",
   message: "The tag cloud is empty. Add some keywords to make it rain.",
-  button: {
-    text: "Create Tag",
-    href: ROUTES.TAGS,
-  },
 }
 
 export const EMPTY_ANSWERS = {

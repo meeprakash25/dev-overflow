@@ -37,13 +37,10 @@ const Home = async ({ searchParams }: SearchParams) => {
         </Link>
       </section>
       <section className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
-        <LocalSearch route={ ROUTES.HOME } imgSrc="/icons/search.svg" placeholder="Search Questions..." otherClasses="" />
-        <CommonFilter
-          filters={ HomeFilters }
-          otherClasses="min-h-[56px] sm:min-w-[170px] w-full"
-        />
+        <LocalSearch route={ROUTES.HOME} imgSrc="/icons/search.svg" placeholder="Search Questions..." otherClasses="" />
+        <CommonFilter filters={HomeFilters} otherClasses="min-h-[56px] sm:min-w-[170px] w-full" />
       </section>
-      
+
       <HomeFilter />
 
       <DataRenderer
@@ -60,11 +57,7 @@ const Home = async ({ searchParams }: SearchParams) => {
         )}
       />
 
-      <Pagination
-        page={ page }
-        isNext={ isNext || false }
-      />
-
+      {questions && questions.length > 0 && <Pagination page={page} isNext={isNext || false} />}
     </>
   )
 }

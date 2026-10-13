@@ -52,7 +52,7 @@ const Collections = async ({ searchParams }: SearchParams) => {
         )}
       />
 
-      <Pagination page={page} isNext={isNext || false} />
+      {collection && collection.length > 0 && <Pagination page={page} isNext={isNext || false} />}
     </>
   )
 }

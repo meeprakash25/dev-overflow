@@ -13,10 +13,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { toast } from "../ui/toast"
 import { useRouter } from "next/navigation"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
+import { deleteQuestion } from "@/lib/actions/question.action"
+import { deleteAnswer } from "@/lib/actions/answer.action"
 
 interface Props {
   type: string
@@ -33,13 +34,31 @@ const EditDeleteAction = ({ type, itemId }: Props) => {
 
   const handleDelete = async () => {
     if (type === "question") {
-      
+      const { success, error } = await deleteQuestion({ questionId: itemId })
+      if (!success) {
+        toast.add({
+          title: "Question not deleted",
+          description: error?.message || "Something went wrong",
+          type: "error",
+        })
+        return
+      }
+
       toast.add({
         title: "Question deleted",
         description: "Your question has been deleted.",
         type:"success"
       })
     } else {
+      const { success, error } = await deleteAnswer({ answerId: itemId })
+      if (!success) {
+        toast.add({
+          title: "Answer not deleted",
+          description: error?.message || "Something went wrong",
+          type: "error",
+        })
+        return
+      }
 
       toast.add({
         title: "Answer deleted",

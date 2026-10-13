@@ -1,9 +1,10 @@
 "use server"
 
 import Question from "@/app/(root)/database/question.model"
+import Vote from "@/app/(root)/database/vote.model"
 import action from "../handlers/action"
 import handleError from "../handlers/error"
-import { AnswerServerSchema, GetAnswersSchema } from "../validations"
+import { AnswerServerSchema, DeleteAnswerSchema, GetAnswersSchema } from "../validations"
 import mongoose from "mongoose"
 import Answer, { IAnswerDoc } from "@/app/(root)/database/answer.model"
 import ROUTES from "@/constants/routes"
@@ -14,23 +15,23 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
   const validationResult = await action({
     params,
     schema: AnswerServerSchema,
-    authorize: true
+    authorize: true,
   })
 
   if (validationResult instanceof Error) {
     return handleError(validationResult) as ErrorResponse
   }
-  
+
   const { content, questionId } = validationResult.params!
   const userId = validationResult.session?.user?.id
-  
+
   const session = await mongoose.startSession()
   session.startTransaction()
 
   try {
     const question = await Question.findById(questionId).session(session)
     if (!question) throw new Error("Question not found")
-    
+
     const [newAnswer] = await Answer.create(
       [
         {
@@ -42,7 +43,7 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
       { session },
     )
 
-    if(!newAnswer) throw new Error("Failed to create answer")
+    if (!newAnswer) throw new Error("Failed to create answer")
 
     question.answers += 1
     await question.save({ session })
@@ -54,14 +55,16 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
     // return { success: true, data: newAnswer }
     return { success: true, data: JSON.parse(JSON.stringify(newAnswer)) }
   } catch (error) {
-    if(session.inTransaction()) await session.abortTransaction()
+    if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
   } finally {
     session.endSession()
   }
 }
 
-export async function getAnswers(params: GetAnswersParams): Promise<ActionResponse<{answers: Answer[], isNext: boolean, totalAnswers: number}>> {
+export async function getAnswers(
+  params: GetAnswersParams,
+): Promise<ActionResponse<{ answers: Answer[]; isNext: boolean; totalAnswers: number }>> {
   const validationResult = await action({
     params,
     schema: GetAnswersSchema,
@@ -71,8 +74,8 @@ export async function getAnswers(params: GetAnswersParams): Promise<ActionRespon
     return handleError(validationResult) as ErrorResponse
   }
 
-  const { questionId, page = 1, pageSize = defaultPageSize, filter="newest" } = validationResult.params!
-  const skip = (Number(page - 1)) * pageSize
+  const { questionId, page = 1, pageSize = defaultPageSize, filter = "newest" } = validationResult.params!
+  const skip = Number(page - 1) * pageSize
   const limit = pageSize
 
   let sortCriteria = {}
@@ -106,10 +109,55 @@ export async function getAnswers(params: GetAnswersParams): Promise<ActionRespon
       data: {
         answers: JSON.parse(JSON.stringify(answers)),
         isNext,
-        totalAnswers
-      }
+        totalAnswers,
+      },
     }
   } catch (error) {
     return handleError(error) as ErrorResponse
+  }
+}
+
+export async function deleteAnswer(params: DeleteAnswerParams): Promise<ActionResponse> {
+  const validationResult = await action({
+    params,
+    schema: DeleteAnswerSchema,
+    authorize: true, // only authorized user can delete answer
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const loggedInUser = validationResult?.session?.user
+
+  const { answerId } = validationResult.params!
+
+  const session = await mongoose.startSession()
+  session.startTransaction()
+
+  try {
+    const answer = await Answer.findById(answerId).session(session)
+    if (!answer) {
+      throw new Error("Answer not found")
+    }
+
+    if (answer.author._id.toString() !== loggedInUser?.id) {
+      throw new Error("Cannot delete this answer, not authorized")
+    }
+
+    await answer.deleteOne().session(session)
+
+    await Vote.deleteMany({ targetType: "answer", targetId: answerId }).session(session)
+
+    await session.commitTransaction()
+
+    revalidatePath(ROUTES.PROFILE(loggedInUser?.id))
+
+    return { success: true }
+  } catch (error) {
+    if (session.inTransaction()) await session.abortTransaction()
+    return handleError(error) as ErrorResponse
+  } finally {
+    await session.endSession()
   }
 }

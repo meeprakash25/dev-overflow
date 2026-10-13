@@ -84,9 +84,10 @@ const AnswerForm = ({ questionId, questionTitle, questionContent }: AnswerFormPr
       if (!success) {
         toast.add({
           title: "Error",
-          description: error instanceof Error ? error.message : "Something went wrong.",
+          description: error.message || "Something went wrong.",
           type: "error",
         })
+        return
       }
 
       const formattedAnswer = data.replace(/<br\s*\/?>/gi, "\n").trim()

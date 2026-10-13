@@ -48,7 +48,7 @@ const Tags = async ({ searchParams }: RouteParams) => {
         )}
       />
 
-      <Pagination page={page} isNext={isNext || false} />
+      {tags && tags.length > 0 && <Pagination page={page} isNext={isNext || false} />}
     </>
   )
 }
