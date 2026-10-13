@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import ProfileLink from "@/components/user/ProfileLink"
 import UserAvatar from "@/components/UserAvatar"
-import { getUser, getUserAnswers, getUserQuestions } from "@/lib/actions/user.action"
+import { getUser, getUserAnswers, getUserQuestions, getUserTopTags } from "@/lib/actions/user.action"
 import { notFound } from "next/navigation"
 import dayjs from "dayjs"
 import Link from "next/link"
@@ -12,10 +12,11 @@ import { defaultPageSize } from "@/constants"
 import Image from "next/image"
 import ROUTES from "@/constants/routes"
 import DataRenderer from "@/components/DataRenderer"
-import { EMPTY_ANSWERS, EMPTY_QUESTION } from "@/constants/states"
+import { EMPTY_ANSWERS, EMPTY_QUESTION, EMPTY_TAGS } from "@/constants/states"
 import QuestionCard from "@/components/cards/QuestionCard"
 import Pagination from "@/components/Pagination"
 import AnswerCard from "@/components/cards/AnswerCard"
+import TagCard from "@/components/cards/TagCard"
 
 const Profile = async ({ params, searchParams }: RouteParams) => {
   const { id } = await params
@@ -45,8 +46,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
     pageSize: Number(pageSize) || defaultPageSize,
   })
 
-  const { questions, isNext: hasMoreQuestions } = userQuestions!
-
+  
   const {
     success: userAnswersSuccess,
     data: userAnswers,
@@ -56,8 +56,19 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
     page: Number(page) || 1,
     pageSize: Number(pageSize) || defaultPageSize,
   })
-
+  
+  
+  const {
+    success: userTopTagsSuccess,
+    data: userTopTags,
+    error: userTopTagsError,
+  } = await getUserTopTags({
+    userId: id,
+  })
+  
+  const { questions, isNext: hasMoreQuestions } = userQuestions!
   const { answers, isNext: hasMoreAnswers } = userAnswers!
+  const { tags } = userTopTags!
 
 
   const { _id, name, image, username, email, bio, location, portfolio, reputation, createdAt } = user
@@ -142,7 +153,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
                 <div className="flex w-full flex-col gap-6">
                   {answers.map((answer) => (
                     <AnswerCard
-                      key={ answer._id }
+                      key={answer._id}
                       {...answer}
                       containerClasses="card-wrapper rounded-[10px] px-7 py-9 sm:px-11"
                       showReadMore
@@ -159,7 +170,26 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
         <div className="flex w-full min-w-[250px] flex-1 flex-col max-lg:hidden">
           <h3 className="h3-bold text-dark200_light900">Top Tech</h3>
           <div className="mt-7 flex flex-col gap-4">
-            <p>List of Tags</p>
+            <DataRenderer
+              data={tags}
+              empty={EMPTY_TAGS}
+              success={userTopTagsSuccess}
+              error={userTopTagsError}
+              render={(tags) => (
+                <div className="mt-3 flex w-full flex-col gap-4">
+                  {tags.map((tag) => (
+                    <TagCard
+                      key={tag._id}
+                      _id={tag._id}
+                      name={tag.name}
+                      questions={tag.count}
+                      showCount
+                      compact
+                    />
+                  ))}
+                </div>
+              )}
+            />
           </div>
         </div>
       </div>
