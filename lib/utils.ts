@@ -1,3 +1,4 @@
+import { BADGE_CRITERIA } from "@/constants"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -896,10 +897,38 @@ export const getTimeStamp = (createdAt: Date): string => {
 
 export const formatNumber = (number: number) => {
   if (number >= 100000) {
-    return (number/1000000).toFixed(1)+"M"
+    return (number / 1000000).toFixed(1) + "M"
   } else if (number >= 1000) {
-    return (number/1000).toFixed(1)+"K"
+    return (number / 1000).toFixed(1) + "K"
   } else {
     return number.toString()
   }
+}
+
+export function assignBadges(params: {
+  criteria: {
+    type: keyof typeof BADGE_CRITERIA
+    count: number
+  }[]
+}) {
+  const badgeCounts: Badges = {
+    GOLD: 0,
+    SILVER: 0,
+    BRONZE: 0,
+  }
+
+  const { criteria } = params
+
+  criteria.forEach((item) => {
+    const { type, count } = item
+    const badgeLevels = BADGE_CRITERIA[type]
+
+    Object.keys(badgeLevels).forEach((level) => {
+      if (count >= badgeLevels[level as keyof typeof badgeLevels]) {
+        badgeCounts[level as keyof Badges] += 1
+      }
+    })
+  })
+
+  return badgeCounts
 }

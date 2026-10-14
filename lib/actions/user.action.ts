@@ -8,6 +8,8 @@ import User from "@/app/(root)/database/user.model"
 import { PipelineStage, QueryFilter, Types } from "mongoose"
 import Question from "@/app/(root)/database/question.model"
 import Answer from "@/app/(root)/database/answer.model"
+import { assignBadges } from "../utils"
+import logger from "../logger"
 
 export async function getUsers(params: PaginatedSearchParams): Promise<ActionResponse<{ users: User[]; isNext: boolean }>> {
   const validationResult = await action({
@@ -241,3 +243,73 @@ export async function getUserTopTags(params: GetUserTagsParams): Promise<
   }
 }
 
+export async function getUserStats(params: GetUserParams): Promise<
+  ActionResponse<{
+    totalQuestions: number
+    totalAnswers: number
+    badges: Badges
+  }>
+> {
+  const validationResult = await action({
+    params,
+    schema: GetUserSchema,
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const { userId } = params
+
+  try {
+    const [questionStats] = await Question.aggregate([
+      { $match: { author: new Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: null,
+          qcount: { $sum: 1 },
+          qupvotes: { $sum: "$upvotes" },
+          qviews: { $sum: "$views" },
+        },
+      },
+    ])
+
+    const [answerStats] = await Answer.aggregate([
+      { $match: { author: new Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: null,
+          acount: { $sum: 1 },
+          aupvotes: { $sum: "$upvotes" },
+        },
+      },
+    ])
+
+    // default values to zero if no match
+    const { qcount = 0, qupvotes = 0, qviews = 0 } = questionStats ?? {}
+    const { acount = 0, aupvotes = 0 } = answerStats ?? {}
+
+    const badges = assignBadges({
+      criteria: [
+        { type: "ANSWER_COUNT", count: acount },
+        { type: "QUESTION_COUNT", count: qcount },
+        {
+          type: "QUESTION_UPVOTES",
+          count: qupvotes + aupvotes,
+        },
+        { type: "TOTAL_VIEWS", count: qviews },
+      ],
+    })
+
+    return {
+      success: true,
+      data: {
+        totalQuestions: qcount,
+        totalAnswers: acount,
+        badges,
+      },
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}

@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import ProfileLink from "@/components/user/ProfileLink"
 import UserAvatar from "@/components/UserAvatar"
-import { getUser, getUserAnswers, getUserQuestions, getUserTopTags } from "@/lib/actions/user.action"
+import { getUser, getUserAnswers, getUserQuestions, getUserStats, getUserTopTags } from "@/lib/actions/user.action"
 import { notFound } from "next/navigation"
 import dayjs from "dayjs"
 import Link from "next/link"
@@ -29,13 +29,16 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
 
   if (!success)
     return (
-      <div>
-        <div className="h1-bold text-dark100_light900">{error?.message}</div>
+      <div className="flex flex-col items-center justify-center gap-4">
+        <h1 className="h1-bold text-dark100_light900">User not found</h1>
+        <p className="paragraph-regular text-dark200_light800 max-w-md">{error?.message}</p>
       </div>
     )
 
-  const { user, totalQuestions, totalAnswers } = data!
+  const { user } = data!
 
+  const { data: userStats } = await getUserStats({ userId: id })
+  
   const {
     success: userQuestionsSuccess,
     data: userQuestions,
@@ -71,7 +74,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
   const { tags } = userTopTags!
 
 
-  const { _id, name, image, username, email, bio, location, portfolio, reputation, createdAt } = user
+  const { _id, name, image, username, bio, location, portfolio, createdAt } = user
 
   return (
     <>
@@ -107,13 +110,10 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
         </div>
       </section>
       <Stats
-        totalQuestions={totalQuestions}
-        totalAnswers={totalAnswers}
-        badges={{
-          GOLD: 0,
-          SILVER: 0,
-          BRONZE: 0,
-        }}
+        totalQuestions={userStats?.totalQuestions!}
+        totalAnswers={userStats?.totalAnswers!}
+        badges={userStats?.badges!}
+        reputationPoints={user.reputation!}
       />
 
       <div className="mt-10 flex gap-10">
