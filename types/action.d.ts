@@ -1,3 +1,4 @@
+
 interface SigninWithOAuthParams {
   provider: "github" | "google"
   providerAccountId: string
@@ -90,4 +91,18 @@ interface DeleteQuestionParams {
 
 interface DeleteAnswerParams {
   answerId: string
+}
+
+interface CreateInteractionParams {
+  action: "view" | "upvote" | "downvote" | "bookmark" | "post" | "edit" | "delete" | "search"
+  actionId: string
+  authorId: string
+  actionTarget: "question" | "answer"
+}
+
+interface UpdateReputationParams {
+  interaction: IInteractionDoc
+  session: mongoose.ClientSession
+  performerId: string
+  authorId: string
 }

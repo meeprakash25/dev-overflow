@@ -128,15 +128,15 @@ export const UpdateVoteCountSchema = CreateVoteSchema.extend({
 
 export const HasVotedSchema = CreateVoteSchema.pick({
   targetId: true,
-  targetType: true
+  targetType: true,
 })
 
 export const CollectionBaseSchema = z.object({
-  questionId: z.string("Question Id must be a string").min(1, "Question Id is required")
+  questionId: z.string("Question Id must be a string").min(1, "Question Id is required"),
 })
 
 export const GetUserSchema = z.object({
-  userId: z.string("User Id must be a string").min(1, "User Id is required")
+  userId: z.string("User Id must be a string").min(1, "User Id is required"),
 })
 
 export const GetUserQuestionsSchema = PaginatedSearchParamsSchema.extend({
@@ -157,4 +157,11 @@ export const DeleteQuestionSchema = z.object({
 
 export const DeleteAnswerSchema = z.object({
   answerId: z.string("Answer Id must be a string").min(1, "Answer Id is required"),
+})
+
+export const CreateInteractionSchema = z.object({
+  action: z.enum(["view", "upvote", "downvote", "bookmark", "post", "edit", "delete", "search"]),
+  actionTarget: z.enum(["question", "answer"]),
+  actionId: z.string().min(1),
+  authorId: z.string().min(1),
 })
