@@ -40,6 +40,25 @@ export const defaultPageSize = 10
 
 export const maxRequestTimeout = 100000
 
+export const REPUTATION_POINTS = {
+  upvote: {
+    performer: 2,
+    author: 10,
+  },
+  downvote: {
+    performer: -1,
+    author: -2,
+  },
+  post: { // author only
+    question: 5,
+    answer: 10,
+  },
+  delete: { // author only
+    question: -5,
+    answer: -10,
+  },
+} as const
+
 // export const BADGE_CRITERIA = {
 //   QUESTION_COUNT: {
 //     BRONZE: 10,
@@ -66,7 +85,7 @@ export const maxRequestTimeout = 100000
 //     SILVER: 10000,
 //     GOLD: 100000,
 //   },
-// }
+// } as const
 
 export const BADGE_CRITERIA = {
   QUESTION_COUNT: {
@@ -94,4 +113,4 @@ export const BADGE_CRITERIA = {
     SILVER: 5,
     GOLD: 10,
   },
-}
+} as const

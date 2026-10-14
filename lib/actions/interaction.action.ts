@@ -4,6 +4,7 @@ import handleError from "../handlers/error"
 import { CreateInteractionSchema } from "../validations"
 import action from "../handlers/action"
 import mongoose from "mongoose"
+import { REPUTATION_POINTS } from "@/constants"
 
 export async function createInteraction(params: CreateInteractionParams): Promise<ActionResponse<IInteractionDoc>> {
   const validationResult = await action({
@@ -68,18 +69,22 @@ async function updateReputation(params: UpdateReputationParams) {
 
   switch (action) {
     case "upvote":
-      performerPoints = 2
-      authorPoints = 10
+      performerPoints = REPUTATION_POINTS.upvote.performer
+      authorPoints = REPUTATION_POINTS.upvote.author
       break
     case "downvote":
-      performerPoints = -1
-      authorPoints = -2
+      performerPoints = REPUTATION_POINTS.downvote.performer
+      authorPoints = REPUTATION_POINTS.downvote.author
       break
     case "post":
-      authorPoints = actionType === "question" ? 5 : 10
+      authorPoints = actionType === "question"
+        ? REPUTATION_POINTS.post.question
+        : REPUTATION_POINTS.post.answer
       break
     case "delete":
-      authorPoints = actionType === "question" ? -5 : -10
+      authorPoints = actionType === "question"
+        ? REPUTATION_POINTS.delete.question
+        : REPUTATION_POINTS.delete.answer
       break
   }
 
