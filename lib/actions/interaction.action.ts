@@ -1,10 +1,10 @@
 import Interaction, { IInteractionDoc } from "@/app/(root)/database/interaction.model"
-import User from "@/app/(root)/database/user.model"
 import handleError from "../handlers/error"
 import { CreateInteractionSchema } from "../validations"
 import action from "../handlers/action"
 import mongoose from "mongoose"
 import { REPUTATION_POINTS } from "@/constants"
+import User from "@/app/(root)/database/user.model"
 
 export async function createInteraction(params: CreateInteractionParams): Promise<ActionResponse<IInteractionDoc>> {
   const validationResult = await action({
@@ -29,25 +29,11 @@ export async function createInteraction(params: CreateInteractionParams): Promis
   session.startTransaction()
 
   try {
-    const [interaction] = await Interaction.create(
-      [
-        {
-          user: userId,
-          action: actionType,
-          actionId,
-          actionType: actionTarget,
-        },
-      ],
-      { session },
-    )
-
-    // Update reputation for both the performer and the content author
-    await updateReputation({
-      interaction,
+    const interaction = await createInteractionInTransaction(
+      { action: actionType, actionId, actionTarget, authorId },
       session,
-      performerId: userId!,
-      authorId,
-    })
+      userId!,
+    )
 
     await session.commitTransaction()
 
@@ -58,6 +44,28 @@ export async function createInteraction(params: CreateInteractionParams): Promis
   } finally {
     await session.endSession()
   }
+}
+
+export async function createInteractionInTransaction(
+  params: CreateInteractionParams,
+  session: mongoose.ClientSession,
+  performerId: string,
+): Promise<IInteractionDoc> {
+  const { action: actionType, actionId, actionTarget, authorId } = params
+  const [interaction] = await Interaction.create(
+    [
+      {
+        user: performerId,
+        action: actionType,
+        actionId,
+        actionType: actionTarget,
+      },
+    ],
+    { session },
+  )
+
+  await updateReputation({ interaction, session, performerId, authorId })
+  return interaction
 }
 
 async function updateReputation(params: UpdateReputationParams) {
@@ -111,3 +119,4 @@ async function updateReputation(params: UpdateReputationParams) {
     { session },
   )
 }
+

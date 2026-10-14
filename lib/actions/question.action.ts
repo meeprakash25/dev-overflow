@@ -23,6 +23,7 @@ import dbConnect from "../mongoose"
 import Answer, { type IAnswerDoc } from "@/app/(root)/database/answer.model"
 import Collection from "@/app/(root)/database/collection.model"
 import Vote from "@/app/(root)/database/vote.model"
+import { createInteractionInTransaction } from "./interaction.action"
 
 export async function createQuestion(params: CreateQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
@@ -36,7 +37,7 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
   }
 
   const { title, content, tags } = params
-  const userId = validationResult?.session?.user?.id
+  const userId = validationResult?.session?.user?.id!
 
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -67,6 +68,13 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
 
     await Question.findByIdAndUpdate(question._id, { $push: { tags: { $each: tagIds } } }, { session })
 
+    await createInteractionInTransaction({
+      action: "post",
+      actionId: question._id.toString(),
+      authorId: userId,
+      actionTarget: "question",
+    }, session, userId)
+
     await session.commitTransaction()
 
     return { success: true, data: JSON.parse(JSON.stringify(question)) }
@@ -74,7 +82,7 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
     if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
   } finally {
-    session.endSession()
+    await session.endSession()
   }
 }
 
@@ -156,7 +164,7 @@ export async function editQuestion(params: EditQuestionParams): Promise<ActionRe
     if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
   } finally {
-    session.endSession()
+    await session.endSession()
   }
 }
 

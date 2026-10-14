@@ -58,7 +58,7 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
     if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
   } finally {
-    session.endSession()
+    await session.endSession()
   }
 }
 

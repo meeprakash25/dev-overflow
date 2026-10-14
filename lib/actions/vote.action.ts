@@ -87,7 +87,7 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
     if (session.inTransaction()) await session.abortTransaction()
     return handleError(error) as ErrorResponse
   } finally {
-    session.endSession()
+    await session.endSession()
   }
 }
 

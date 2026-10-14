@@ -69,6 +69,7 @@ const QuestionForm = ({ question, isEdit = false }: Params) => {
 
       const result = await createQuestion(data)
       if (result.success) {
+        
         toast.add({
           title: "Success",
           description: "Question created successfully",
