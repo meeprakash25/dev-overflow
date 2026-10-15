@@ -6,18 +6,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-const NavLinks = ({ isMobileNav = false, userId }: { isMobileNav?: boolean, userId?:string }) => {
+const NavLinks = ({ isMobileNav = false }: { isMobileNav?: boolean }) => {
   const pathname = usePathname()
   return (
     <>
       {sideBarLinks.map((item) => {
         const isActive = (pathname.includes(item.route) && item.route.length > 1) || pathname === item.route
-        const href = item.route === "/profile" ? (userId ? `${item.route}/${userId}` : null) : item.route
-
-        if (!href) return null
         const linkComponent = (
           <Link
-            href={href}
+            href={item.route}
             key={item.label}
             className={cn(
               isActive ? "primary-gradient rounded-lg text-light-900" : "text-dark300_light900",
