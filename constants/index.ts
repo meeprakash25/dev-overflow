@@ -42,18 +42,34 @@ export const maxRequestTimeout = 100000
 
 export const REPUTATION_POINTS = {
   upvote: {
-    performer: 2,
-    author: 10,
+    question: {
+      performer: 2,
+      author: 10,
+    },
+    answer: {
+      performer: 0,
+      question_author: 2,
+      answer_author: 5,
+    },
   },
   downvote: {
-    performer: -1,
-    author: -2,
+    question: {
+      performer: -1,
+      author: -2,
+    },
+    answer: {
+      performer: -1,
+      question_author: 0,
+      answer_author: -5,
+    },
   },
-  post: { // author only
+  post: {
+    // author only
     question: 5,
     answer: 10,
   },
-  delete: { // author only
+  delete: {
+    // author only
     question: -5,
     answer: -10,
   },

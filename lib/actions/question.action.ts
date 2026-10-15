@@ -69,12 +69,16 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
 
     await Question.findByIdAndUpdate(question._id, { $push: { tags: { $each: tagIds } } }, { session })
 
-    await createInteractionInTransaction({
-      action: "post",
-      actionId: question._id.toString(),
-      authorId: userId,
-      actionTarget: "question",
-    }, session, userId)
+    await createInteractionInTransaction(
+      {
+        action: "post",
+        actionId: question._id.toString(),
+        questionAuthorId: userId,
+        actionTarget: "question",
+      },
+      session,
+      userId,
+    )
 
     await session.commitTransaction()
 
@@ -336,18 +340,23 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
       await Answer.deleteMany({ question: questionId }).session(session)
       await Vote.deleteMany({
         targetType: "answer",
-        targetId: {$in: answers.map((answer) => answer.id)}
+        targetId: { $in: answers.map((answer) => answer._id) },
       }).session(session)
       await Interaction.deleteMany({
+        action: { $in: ["post", "delete"] },
         actionType: "answer",
-        actionId: { $in: answers.map((answer) => answer.id) },
+        actionId: { $in: answers.map((answer) => answer._id) },
       }).session(session)
     }
 
     await Collection.deleteOne({ question: questionId }).session(session)
     await TagQuestion.deleteMany({ question: questionId }).session(session)
     await Vote.deleteMany({ targetType: "question", targetId: questionId }).session(session)
-    await Interaction.deleteMany({ actionType: "question", actionId: questionId }).session(session)
+    await Interaction.deleteMany({
+      action: { $in: ["post", "delete"] },
+      actionType: "question",
+      actionId: questionId,
+    }).session(session)
 
     // For all tags of question, find them and reduce their count
     if (question.tags.length > 0) {
@@ -362,7 +371,7 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
 
     await updateReputationInTransaction({
       action: "delete",
-      authorId: question.author._id.toString(),
+      questionAuthorId: question.author._id.toString(),
       actionTarget: "question",
       session,
     })

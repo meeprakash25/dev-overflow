@@ -5,10 +5,15 @@ import action from "../handlers/action"
 import handleError from "../handlers/error"
 import { CreateVoteSchema, HasVotedSchema, UpdateVoteCountSchema } from "../validations"
 import mongoose, { ClientSession } from "mongoose"
-import Question from "@/app/(root)/database/question.model"
-import Answer from "@/app/(root)/database/answer.model"
+import Question, { IQuestion, IQuestionDoc } from "@/app/(root)/database/question.model"
+import Answer, { IAnswerDoc } from "@/app/(root)/database/answer.model"
 import { revalidatePath } from "next/cache"
 import ROUTES from "@/constants/routes"
+import {
+  createInteractionInTransaction,
+  deleteInteractionInTransaction,
+  updateInteractionInTransaction,
+} from "./interaction.action"
 
 async function updateVoteCount(params: UpdateVoteCountParams, session: ClientSession): Promise<void> {
   const validationResult = await action({
@@ -56,6 +61,20 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
   session.startTransaction()
 
   try {
+    let question = undefined, answerAuthorId = undefined
+    if (targetType === "question") question = (await Question.findById(targetId).session(session)) as IQuestionDoc
+    else {
+      const answer = (await Answer.findById(targetId).select("_id author question").session(session)) as IAnswerDoc
+      question = (await Question.findById(answer.question).select("_id author").session(session)) as IQuestionDoc
+      answerAuthorId = answer.author.toString()
+    }
+
+    if (!question) {
+      throw new Error(`Question not found.`)
+    }
+    
+    const questionAuthorId = question.author.toString()
+
     const existingVote = await Vote.findOne({
       author: userId,
       targetId,
@@ -67,16 +86,56 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
         // if the user has already voted with the same voteType, remove the vote
         await Vote.deleteOne({ _id: existingVote._id }).session(session)
         await updateVoteCount({ targetId, targetType, voteType, change: -1 }, session)
+
+        // if (userId !== targetAuthorId) {
+        await deleteInteractionInTransaction(
+          {
+            action: voteType,
+            actionId: targetId,
+            questionAuthorId: questionAuthorId,
+            answerAuthorId: answerAuthorId,
+            actionTarget: targetType,
+          },
+          session,
+        )
+        // }
       } else {
         // if the user has already voted with a different voteType, update the vote
         await Vote.findByIdAndUpdate(existingVote._id, { voteType }, { new: true, session })
         await updateVoteCount({ targetId, targetType, voteType: existingVote.voteType, change: -1 }, session)
         await updateVoteCount({ targetId, targetType, voteType, change: 1 }, session)
+
+        // if (userId !== targetAuthorId) {
+        await updateInteractionInTransaction(
+          {
+            action: voteType,
+            actionId: targetId,
+            questionAuthorId: questionAuthorId,
+            answerAuthorId: answerAuthorId,
+            actionTarget: targetType,
+          },
+          session,
+        )
+        // }
       }
     } else {
       // if the user has not voted yet, create a new vote
       await Vote.create([{ author: userId, targetId, targetType, voteType }], { session })
       await updateVoteCount({ targetId, targetType, voteType, change: 1 }, session)
+
+      // if (userId !== targetAuthorId) {
+      await createInteractionInTransaction(
+        {
+          action: voteType,
+          actionId: targetId,
+          questionAuthorId: questionAuthorId,
+          answerAuthorId: answerAuthorId,
+          actionTarget: targetType,
+        },
+        session,
+        userId,
+      )
+      // }
     }
 
     await session.commitTransaction()

@@ -96,7 +96,24 @@ interface DeleteAnswerParams {
 interface CreateInteractionParams {
   action: "view" | "upvote" | "downvote" | "bookmark" | "post" | "edit" | "delete" | "search"
   actionId: string
-  authorId: string
+  questionAuthorId: string
+  answerAuthorId?: string
+  actionTarget: "question" | "answer"
+}
+
+interface UpdateInteractionParams {
+  action: "upvote" | "downvote"
+  actionId: string
+  questionAuthorId: string
+  answerAuthorId?: string
+  actionTarget: "question" | "answer"
+}
+
+interface DeleteInteractionParams {
+  action: "upvote" | "downvote"
+  actionId: string
+  questionAuthorId: string
+  answerAuthorId?: string
   actionTarget: "question" | "answer"
 }
 
@@ -104,5 +121,6 @@ interface UpdateReputationParams {
   action: CreateInteractionParams["action"]
   actionTarget: CreateInteractionParams["actionTarget"]
   session: mongoose.ClientSession
-  authorId: string
+  questionAuthorId: string
+  answerAuthorId?: string
 }
