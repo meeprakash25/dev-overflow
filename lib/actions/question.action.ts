@@ -172,7 +172,7 @@ export async function getQuestion(params: GetQuestionParams): Promise<ActionResp
   const validationResult = await action({
     params,
     schema: GetQuestionSchema,
-    authorize: true, // only authorized user can view question
+    // authorize: true
   })
 
   if (validationResult instanceof Error) {
@@ -353,6 +353,17 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
     }
 
     await question.deleteOne().session(session)
+
+    await createInteractionInTransaction(
+      {
+        action: "delete",
+        actionId: question._id.toString(),
+        authorId: loggedInUser?.id,
+        actionTarget: "question",
+      },
+      session,
+      loggedInUser?.id,
+    )
 
     await session.commitTransaction()
 
