@@ -23,7 +23,8 @@ import dbConnect from "../mongoose"
 import Answer, { type IAnswerDoc } from "@/app/(root)/database/answer.model"
 import Collection from "@/app/(root)/database/collection.model"
 import Vote from "@/app/(root)/database/vote.model"
-import { createInteractionInTransaction } from "./interaction.action"
+import { createInteractionInTransaction, updateReputationInTransaction } from "./interaction.action"
+import Interaction from "@/app/(root)/database/interaction.model"
 
 export async function createQuestion(params: CreateQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
@@ -337,11 +338,16 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
         targetType: "answer",
         targetId: {$in: answers.map((answer) => answer.id)}
       }).session(session)
+      await Interaction.deleteMany({
+        actionType: "answer",
+        actionId: { $in: answers.map((answer) => answer.id) },
+      }).session(session)
     }
 
     await Collection.deleteOne({ question: questionId }).session(session)
     await TagQuestion.deleteMany({ question: questionId }).session(session)
     await Vote.deleteMany({ targetType: "question", targetId: questionId }).session(session)
+    await Interaction.deleteMany({ actionType: "question", actionId: questionId }).session(session)
 
     // For all tags of question, find them and reduce their count
     if (question.tags.length > 0) {
@@ -354,16 +360,12 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
 
     await question.deleteOne().session(session)
 
-    await createInteractionInTransaction(
-      {
-        action: "delete",
-        actionId: question._id.toString(),
-        authorId: loggedInUser?.id,
-        actionTarget: "question",
-      },
+    await updateReputationInTransaction({
+      action: "delete",
+      authorId: question.author._id.toString(),
+      actionTarget: "question",
       session,
-      loggedInUser?.id,
-    )
+    })
 
     await session.commitTransaction()
 

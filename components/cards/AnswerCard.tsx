@@ -43,7 +43,7 @@ const AnswerCard = ({
             id={author._id}
             name={author.name}
             imageUrl={author.image}
-            className="size-5 rounded-full object-cover max-sm:mt-2"
+            className="size-5 rounded-full object-cover max-sm:mt-2 after:border-gray-400!"
             fallbackClassName="text-[10px]"
           />
           <Link href={ROUTES.PROFILE(author._id)} className="flex flex-col max-sm:ml-1 sm:flex-row sm:items-center">

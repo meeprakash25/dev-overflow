@@ -5,6 +5,7 @@ import action from "../handlers/action"
 import mongoose from "mongoose"
 import { REPUTATION_POINTS } from "@/constants"
 import User from "@/app/(root)/database/user.model"
+import { auth } from "@/auth"
 
 export async function createInteraction(params: CreateInteractionParams): Promise<ActionResponse<IInteractionDoc>> {
   const validationResult = await action({
@@ -51,7 +52,14 @@ export async function createInteractionInTransaction(
   session: mongoose.ClientSession,
   performerId: string,
 ): Promise<IInteractionDoc> {
+
+  const authSession = await auth()
+  if (!authSession) throw new Error("Only logged-in user can use this feature.")
+
+  // const authUserId = authSession?.user?.id
+  
   const { action: actionType, actionId, actionTarget, authorId } = params
+
   const [interaction] = await Interaction.create(
     [
       {
@@ -64,13 +72,17 @@ export async function createInteractionInTransaction(
     { session },
   )
 
-  await updateReputation({ interaction, session, performerId, authorId })
+  await updateReputationInTransaction({ action: actionType, actionTarget, session, authorId })
   return interaction
 }
 
-async function updateReputation(params: UpdateReputationParams) {
-  const { interaction, session, performerId, authorId } = params
-  const { action, actionType } = interaction
+export async function updateReputationInTransaction(params: UpdateReputationParams): Promise<void> {
+  const authSession = await auth()
+  if (!authSession) throw new Error("Only logged-in user can use this feature.")
+
+  const { action, actionTarget, session, authorId } = params
+
+  const performerId = authSession?.user?.id
 
   let performerPoints = 0
   let authorPoints = 0
@@ -85,14 +97,10 @@ async function updateReputation(params: UpdateReputationParams) {
       authorPoints = REPUTATION_POINTS.downvote.author
       break
     case "post":
-      authorPoints = actionType === "question"
-        ? REPUTATION_POINTS.post.question
-        : REPUTATION_POINTS.post.answer
+      authorPoints = actionTarget === "question" ? REPUTATION_POINTS.post.question : REPUTATION_POINTS.post.answer
       break
     case "delete":
-      authorPoints = actionType === "question"
-        ? REPUTATION_POINTS.delete.question
-        : REPUTATION_POINTS.delete.answer
+      authorPoints = actionTarget === "question" ? REPUTATION_POINTS.delete.question : REPUTATION_POINTS.delete.answer
       break
   }
 
@@ -119,4 +127,3 @@ async function updateReputation(params: UpdateReputationParams) {
     { session },
   )
 }
-

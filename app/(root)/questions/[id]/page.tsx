@@ -62,7 +62,7 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
               id={author._id}
               name={author.name}
               imageUrl={author.image}
-              className="size-[22px]"
+              className="size-[22px] after:border-gray-400!"
               fallbackClassName="text-[10px]"
             />
             <Link href={ROUTES.PROFILE(author._id)}>
@@ -80,10 +80,7 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
               />
             </Suspense>
             <Suspense fallback={<div>Loading...</div>}>
-              <SaveQuestion 
-                questionId={question._id}
-                hasSavedQuestionPromise={hasSavedQuestionPromise}
-              />
+              <SaveQuestion questionId={question._id} hasSavedQuestionPromise={hasSavedQuestionPromise} />
             </Suspense>
           </div>
         </div>

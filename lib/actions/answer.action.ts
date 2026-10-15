@@ -10,6 +10,8 @@ import Answer, { IAnswerDoc } from "@/app/(root)/database/answer.model"
 import ROUTES from "@/constants/routes"
 import { revalidatePath } from "next/cache"
 import { defaultPageSize } from "@/constants"
+import { createInteractionInTransaction, updateReputationInTransaction } from "./interaction.action"
+import Interaction from "@/app/(root)/database/interaction.model"
 
 export async function createAnswer(params: CreateAnswerParams): Promise<ActionResponse<IAnswerDoc>> {
   const validationResult = await action({
@@ -23,7 +25,7 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
   }
 
   const { content, questionId } = validationResult.params!
-  const userId = validationResult.session?.user?.id
+  const userId = validationResult.session?.user?.id!
 
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -48,11 +50,25 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
     question.answers += 1
     await question.save({ session })
 
+    const authorId = question.author._id.toString()
+
+    if (userId !== authorId) {
+      await createInteractionInTransaction(
+        {
+          action: "post",
+          actionId: question._id.toString(),
+          authorId: authorId,
+          actionTarget: "answer",
+        },
+        session,
+        userId,
+      )
+    }
+
     await session.commitTransaction()
 
     revalidatePath(ROUTES.QUESTION(questionId))
 
-    // return { success: true, data: newAnswer }
     return { success: true, data: JSON.parse(JSON.stringify(newAnswer)) }
   } catch (error) {
     if (session.inTransaction()) await session.abortTransaction()
@@ -148,6 +164,18 @@ export async function deleteAnswer(params: DeleteAnswerParams): Promise<ActionRe
     await answer.deleteOne().session(session)
 
     await Vote.deleteMany({ targetType: "answer", targetId: answerId }).session(session)
+
+    await Question.findByIdAndUpdate(answer.question, { $inc: { answers: -1 } }).session(session)
+
+    await Interaction.deleteMany({ actionType: "answer", actionId: answerId }).session(session)
+
+
+    await updateReputationInTransaction({
+      action: "delete",
+      authorId: answer.author._id.toString(),
+      actionTarget: "answer",
+      session,
+    })
 
     await session.commitTransaction()
 
