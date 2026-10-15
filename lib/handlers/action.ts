@@ -34,7 +34,7 @@ async function action<T>({ params, schema, authorize = false }: ActionOptions<T>
 
   if (authorize) {
     session = await auth()
-    if (!session) return new UnauthorizedError()
+    if (!session) return new UnauthorizedError("You need to be logged in to use this feature.")
   }
   await dbConnect()
   return { params, session }
