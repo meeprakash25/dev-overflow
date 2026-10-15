@@ -47,7 +47,7 @@ const MobileNavigation = async () => {
             nativeButton={false}
             render={
               <section className="flex flex-col gap-6">
-                <NavLinks isMobileNav />
+                <NavLinks isMobileNav userId={userId} />
               </section>
             }
           />

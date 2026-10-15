@@ -12,14 +12,12 @@ const NavLinks = ({ isMobileNav = false, userId }: { isMobileNav?: boolean, user
     <>
       {sideBarLinks.map((item) => {
         const isActive = (pathname.includes(item.route) && item.route.length > 1) || pathname === item.route
+        const href = item.route === "/profile" ? (userId ? `${item.route}/${userId}` : null) : item.route
 
-        if (item.route === "/profile") {
-          if (userId) item.route = `${item.route}/${userId}`
-          else return null
-        }
+        if (!href) return null
         const linkComponent = (
           <Link
-            href={item.route}
+            href={href}
             key={item.label}
             className={cn(
               isActive ? "primary-gradient rounded-lg text-light-900" : "text-dark300_light900",
