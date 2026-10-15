@@ -29,14 +29,14 @@ const AnswerCard = ({
   const hasVotedPromise = hasVoted({ targetId: _id, targetType: "answer" })
 
   return (
-    <article id={`answer-${_id}`} className={cn("light-border border-b py-10 relative scroll-mt-[140px]", containerClasses)}>
-      {
-        showActionBtns && (
-          <div className="background-light-800 flex-center absolute -right-0 sm:-right-3 -top-3 size-9 rounded-full">
-            <EditDeleteAction type="answer" itemId={_id} />
-          </div>
-        )
-      }
+    <article
+      id={`answer-${_id}`}
+      className={cn("light-border border-b py-10 relative scroll-mt-[140px]", containerClasses)}>
+      {showActionBtns && (
+        <div className="background-light-800 flex-center absolute -right-0 sm:-right-3 -top-3 size-9 rounded-full">
+          <EditDeleteAction type="answer" itemId={_id} />
+        </div>
+      )}
       <div className="mb-5 flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
         <div className="flex flex-1 items-start gap-1 sm:items-center">
           <UserAvatar
@@ -44,6 +44,7 @@ const AnswerCard = ({
             name={author.name}
             imageUrl={author.image}
             className="size-5 rounded-full object-cover max-sm:mt-2"
+            fallbackClassName="text-[10px]"
           />
           <Link href={ROUTES.PROFILE(author._id)} className="flex flex-col max-sm:ml-1 sm:flex-row sm:items-center">
             <p className="body-semibold text-dark300_light700">{author.name ?? "Anonymous"}</p>

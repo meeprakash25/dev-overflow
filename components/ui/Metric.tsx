@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
-import React from "react"
+import { Avatar, AvatarFallback } from "./avatar"
 
 interface Props {
   imgUrl: string
@@ -16,9 +16,26 @@ interface Props {
 }
 
 const Metric = ({ imgUrl, alt, value, title, href, textStyles, imgStyles, isAuthor = false, titleStyles }: Props) => {
+    const initials =
+      alt
+        ?.trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) ?? ""
+  
   const metricContent = (
     <>
-      <Image src={imgUrl} width={16} height={16} alt={alt} className={`rounded-full object-contain ${imgStyles}`} />
+      {imgUrl ?
+        <Image src={imgUrl} width={16} height={16} alt={alt} className={`rounded-full object-contain ${imgStyles}`} />
+      : <Avatar className="size-4">
+          <AvatarFallback className="primary-gradient font-space-grotesk text-[8px] font-bold tracking-wider text-white">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+      }
       <p className={`body-medium ${textStyles} flex items-center gap-1`}>
         {value}
         {title ?
