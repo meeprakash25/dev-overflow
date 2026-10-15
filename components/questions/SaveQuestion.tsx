@@ -27,7 +27,7 @@ const SaveQuestion = ({
     if (isLoading) return
     if (!userId) {
       return toast.add({
-        title: "Only logged in user can use this feature.",
+        title: "Only logged-in user can use this feature.",
         type: "error",
       })
     }
