@@ -72,7 +72,7 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
     if (!question) {
       throw new Error(`Question not found.`)
     }
-    
+
     const questionAuthorId = question.author.toString()
 
     const existingVote = await Vote.findOne({
@@ -133,7 +133,6 @@ export async function createVote(params: CreateVoteParams): Promise<ActionRespon
           actionTarget: targetType,
         },
         session,
-        userId,
       )
       // }
     }

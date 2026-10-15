@@ -77,7 +77,6 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
         actionTarget: "question",
       },
       session,
-      userId,
     )
 
     await session.commitTransaction()
@@ -115,7 +114,7 @@ export async function editQuestion(params: EditQuestionParams): Promise<ActionRe
     }
 
     if (question.author.toString() !== userId) {
-      throw new Error("Unauthorized")
+      throw new Error("You are not authorized to perform this action.")
     }
 
     if (question.title !== title || question.content !== content) {

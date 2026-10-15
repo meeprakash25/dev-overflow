@@ -57,11 +57,10 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
         {
           action: "post",
           actionId: question._id.toString(),
-          authorId: authorId,
+          questionAuthorId: authorId,
           actionTarget: "answer",
         },
         session,
-        userId,
       )
     }
 
@@ -172,7 +171,7 @@ export async function deleteAnswer(params: DeleteAnswerParams): Promise<ActionRe
 
     await updateReputationInTransaction({
       action: "delete",
-      authorId: answer.author._id.toString(),
+      questionAuthorId: answer.author._id.toString(), // its correct
       actionTarget: "answer",
       session,
     })

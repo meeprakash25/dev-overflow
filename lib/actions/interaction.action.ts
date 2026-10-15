@@ -25,8 +25,8 @@ export async function createInteraction(params: CreateInteractionParams): Promis
     questionAuthorId, // person who owns the content question
     answerAuthorId, // person who owns the content answer
   } = validationResult.params!
-  const userId = validationResult.session?.user?.id
-  const performerId = userId
+  const userId = validationResult.session?.user?.id!
+  // const performerId = userId
 
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -35,7 +35,6 @@ export async function createInteraction(params: CreateInteractionParams): Promis
     const interaction = await createInteractionInTransaction(
       { action: actionType, actionId, actionTarget, questionAuthorId, answerAuthorId },
       session,
-      userId!,
     )
 
     await session.commitTransaction()
@@ -52,13 +51,13 @@ export async function createInteraction(params: CreateInteractionParams): Promis
 export async function createInteractionInTransaction(
   params: CreateInteractionParams,
   session: mongoose.ClientSession,
-  performerId: string,
 ): Promise<IInteractionDoc> {
 
   const authSession = await auth()
   if (!authSession) throw new Error("Only logged-in user can use this feature.")
 
-  // const authUserId = authSession?.user?.id
+  const authUserId = authSession?.user?.id
+  const performerId = authUserId
   
   const { action: actionType, actionId, actionTarget, questionAuthorId, answerAuthorId } = params
 
