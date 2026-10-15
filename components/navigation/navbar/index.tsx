@@ -31,6 +31,7 @@ const Navbar = async () => {
             id={session.user.id}
             name={session.user.name ?? undefined}
             imageUrl={session.user.image ?? undefined}
+            className=" after:border-gray-400!"
           />
         )}
 

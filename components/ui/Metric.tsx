@@ -30,8 +30,8 @@ const Metric = ({ imgUrl, alt, value, title, href, textStyles, imgStyles, isAuth
     <>
       {imgUrl ?
         <Image src={imgUrl} width={16} height={16} alt={alt} className={`rounded-full object-contain ${imgStyles}`} />
-      : <Avatar className="size-4">
-          <AvatarFallback className="primary-gradient font-space-grotesk text-[8px] font-bold tracking-wider text-white">
+      : <Avatar className="size-4 after:border-gray-300! dark:after:border-gray-300!">
+          <AvatarFallback className="primary-gradient font-space-grotesk text-[8px] font-bold tracking-wider text-white ">
             {initials}
           </AvatarFallback>
         </Avatar>
