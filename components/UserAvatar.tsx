@@ -14,13 +14,14 @@ interface Props {
 
 const UserAvatar = ({ id, name, imageUrl, className = "h-8 w-8", fallbackClassName }: Props) => {
   const initials =
-    name ??
-    ""
-      .split(" ")
-      .map((word: string) => word[0])
+    name
+      ?.trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => word[0])
       .join("")
       .toUpperCase()
-      .slice(0, 2)
+      .slice(0, 2) ?? ""
 
   return (
     <Link href={ROUTES.PROFILE(id)}>
