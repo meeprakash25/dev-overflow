@@ -71,7 +71,7 @@ const AnswerForm = ({ questionId, questionTitle, questionContent }: AnswerFormPr
     if (session.status !== "authenticated") {
       return toast.add({
         title: "Please login",
-        description: "You need to be logged in to use this feature.",
+        description: "Only logged in user can use this feature.",
         type: "error",
       })
     }
