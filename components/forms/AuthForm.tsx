@@ -11,6 +11,7 @@ import ROUTES from "@/constants/routes"
 import Link from "next/link"
 import { toast } from "../ui/toast"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 interface AuthFormProps<T extends FieldValues> {
   schema: ZodType<T,T>
@@ -21,6 +22,7 @@ interface AuthFormProps<T extends FieldValues> {
 
 const AuthForm = <T extends FieldValues>({ schema, defaultValues, formType, onSubmit }: AuthFormProps<T>) => {
   const router = useRouter()
+  const { update: updateSession } = useSession()
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>,
@@ -30,6 +32,8 @@ const AuthForm = <T extends FieldValues>({ schema, defaultValues, formType, onSu
     const result = (await onSubmit(data)) as ActionResponse
 
     if (result?.success) {
+      await updateSession()
+
       toast.add({
         title: "Success",
         description: formType === "SIGN_IN" ? "Signed in successfully" : "Signed up successfully",
