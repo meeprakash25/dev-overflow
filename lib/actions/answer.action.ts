@@ -102,7 +102,7 @@ export async function getAnswers(
       .skip(skip)
       .limit(limit)
 
-    const isNext = totalAnswers > page + answers.length
+    const isNext = totalAnswers > skip + answers.length
 
     return {
       success: true,
