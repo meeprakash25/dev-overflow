@@ -308,10 +308,10 @@ export async function incrementViews(params: IncrementViewsParams): Promise<Acti
   }
 }
 
-export async function getHotQuestions(): Promise<ActionResponse> {
+export async function getHotQuestions(): Promise<ActionResponse<Array<{ _id: string; title: string }>>> {
   try {
     await dbConnect()
-    const questions = await Question.find().sort({ views: -1, upvotes: -1 }).limit(5)
+    const questions = await Question.find().select("_id title").sort({ views: -1, upvotes: -1 }).limit(5)
 
     return {
       success: true,
