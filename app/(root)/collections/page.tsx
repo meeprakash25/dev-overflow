@@ -8,6 +8,7 @@ import { getSavedQuestions } from "@/lib/actions/collection.action"
 import CommonFilter from "@/components/filters/CommonFilter"
 import { CollectionFilters } from "@/constants/filters"
 import Pagination from "@/components/Pagination"
+import { auth } from "@/auth"
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>
@@ -15,6 +16,7 @@ interface SearchParams {
 
 const Collections = async ({ searchParams }: SearchParams) => {
   const { page, pageSize, query, filter } = await searchParams
+  const userAuth = await auth()
 
   const { success, data, error } = await getSavedQuestions({
     page: Number(page) || 1,
@@ -46,7 +48,11 @@ const Collections = async ({ searchParams }: SearchParams) => {
         render={(collection) => (
           <div className="mt-10 flex w-full flex-col gap-6">
             {collection.map((item) => (
-              <QuestionCard key={item._id} question={item.question} />
+              <QuestionCard
+                key={item._id}
+                question={item.question}
+                showActionBtns={userAuth?.user?.id === item.question.author._id.toString()}
+              />
             ))}
           </div>
         )}
