@@ -11,6 +11,7 @@ import { EMPTY_QUESTION } from "@/constants/states"
 import CommonFilter from "@/components/filters/CommonFilter"
 import { HomeFilters } from "@/constants/filters"
 import Pagination from "@/components/Pagination"
+import { auth } from "@/auth"
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>
@@ -18,6 +19,7 @@ interface SearchParams {
 
 const Home = async ({ searchParams }: SearchParams) => {
   const { page, pageSize, query, filter } = await searchParams
+  const userAuth = await auth()
 
   const { success, data, error } = await getQuestions({
     page: Number(page) || 1,
@@ -51,7 +53,11 @@ const Home = async ({ searchParams }: SearchParams) => {
         render={(questions) => (
           <div className="mt-10 flex w-full flex-col gap-6">
             {questions.map((question) => (
-              <QuestionCard key={question._id} question={question} />
+              <QuestionCard
+                key={question._id}
+                question={question}
+                showActionBtns={userAuth?.user?.id === question.author._id.toString()}
+              />
             ))}
           </div>
         )}

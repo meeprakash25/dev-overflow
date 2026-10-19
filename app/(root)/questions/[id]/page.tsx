@@ -20,7 +20,7 @@ import { Suspense } from "react"
 
 const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
   const { id } = await params
-  const { page, pageSize, filter } = await searchParams
+  const { page, pageSize, filter, error } = await searchParams
 
   const [_, { success, data: question }] = await Promise.all([
     await incrementViews({ questionId: id }),
@@ -55,6 +55,11 @@ const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
     
   return (
     <>
+      {error === "unauthorized-edit" && (
+        <p role="alert" className="mb-4 text-red-500">
+          You are not authorized to edit this question.
+        </p>
+      )}
       <div className="flex-start w-full flex-col">
         <div className="flex w-full flex-col-reverse justify-between">
           <div className="flex items-center justify-start gap-1">

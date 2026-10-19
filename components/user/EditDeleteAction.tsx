@@ -41,6 +41,7 @@ const EditDeleteAction = ({ type, itemId }: Props) => {
           description: error?.message || "Something went wrong",
           type: "error",
         })
+        setIsDialogOpen(false)
         return
       }
 
@@ -57,6 +58,7 @@ const EditDeleteAction = ({ type, itemId }: Props) => {
           description: error?.message || "Something went wrong",
           type: "error",
         })
+        setIsDialogOpen(false)
         return
       }
 
@@ -68,6 +70,7 @@ const EditDeleteAction = ({ type, itemId }: Props) => {
     }
 
     setIsDialogOpen(false)
+    return
   }
 
   return (
