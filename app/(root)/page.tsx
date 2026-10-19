@@ -21,6 +21,8 @@ const Home = async ({ searchParams }: SearchParams) => {
   const { page, pageSize, query, filter } = await searchParams
   const userAuth = await auth()
 
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+
   const { success, data, error } = await getQuestions({
     page: Number(page) || 1,
     pageSize: Number(pageSize) || defaultPageSize,
