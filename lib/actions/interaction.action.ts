@@ -25,7 +25,7 @@ export async function createInteraction(params: CreateInteractionParams): Promis
     questionAuthorId, // person who owns the content question
     answerAuthorId, // person who owns the content answer
   } = validationResult.params!
-  const userId = validationResult.session?.user?.id!
+  // const userId = validationResult.session?.user?.id!
   // const performerId = userId
 
   const session = await mongoose.startSession()

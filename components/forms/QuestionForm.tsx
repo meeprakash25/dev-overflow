@@ -138,7 +138,7 @@ const QuestionForm = ({ question, isEdit = false }: Params) => {
               aria-invalid={fieldState.invalid}
             />
             <FieldDescription className="body-regular mt-2.5 text-light-500">
-              Be specific and imagine that you're asking a question to another
+              Be specific and imagine that you&apos;re asking a question to another
             </FieldDescription>
             <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
@@ -155,7 +155,7 @@ const QuestionForm = ({ question, isEdit = false }: Params) => {
             </FieldLabel>
             <Editor value={field.value} fieldChange={field.onChange} editorRef={editorRef} />
             <FieldDescription className="body-regular mt-2.5 text-light-500">
-              Introduce the problem and expand what you've put in the title
+              Introduce the problem and expand what you&apos;ve put in the title
             </FieldDescription>
             <FieldError className="text-red-500" errors={[fieldState.error]} />
           </Field>
