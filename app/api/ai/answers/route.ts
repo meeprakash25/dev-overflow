@@ -87,7 +87,7 @@ export async function POST(req: Request): Promise<APIResponse> {
 
     const text = generatedText.replace(/^\s*User Safety:\s*safe\s*$/gim, "").trim()
     if (!text) {
-      throw new Error("OpenRouter returned a safety label instead of an answer")
+      throw new Error("Failed to generate answer, please try again")
     }
 
     await SaveAiAnswer({ questionId, answer: text, userId })
