@@ -88,6 +88,8 @@ export async function POST(req: Request): Promise<APIResponse> {
       throw new Error("Failed to generate answer, please try again")
     }
 
+    console.log(text)
+
     await SaveAiAnswer({ questionId, answer: text, userId })
 
     return NextResponse.json({ success: true, data: text }, { status: 200 })
@@ -125,11 +127,11 @@ const SaveAiAnswer = async ({
     const user = await User.findOneAndUpdate(
       {
         _id: userId,
-        $or: [{ aiAnswerCount: { $lt: 5 } }, { aiAnswerCount: { $exists: false } }],
       },
       { $inc: { aiAnswerCount: 1 } },
       { session: mSession },
     )
+
     if (!user) {
       const existingUser = await User.findById(userId).session(mSession)
       if (!existingUser) throw new NotFoundError("User")
