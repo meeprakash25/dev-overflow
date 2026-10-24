@@ -40,7 +40,7 @@ export const defaultPageSize = 10
 
 export const maxRequestTimeout = 100000
 
-export const maxAiAnswerCount = 5 as const
+export const maxAiAnswerCount = 50 as const
 
 export const REPUTATION_POINTS = {
   upvote: {

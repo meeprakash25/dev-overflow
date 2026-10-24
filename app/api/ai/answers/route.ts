@@ -133,7 +133,7 @@ const SaveAiAnswer = async ({
     if (!user) {
       const existingUser = await User.findById(userId).session(mSession)
       if (!existingUser) throw new NotFoundError("User")
-      if ((existingUser.aiAnswerCount ?? 0) >= 5) {
+      if ((existingUser.aiAnswerCount ?? 0) >= maxAiAnswerCount) {
         throw new ForbiddenError(`You have reached the limit of ${maxAiAnswerCount} AI-generated answers.`)
       }
       throw new Error("Failed to update AI answer count")
