@@ -111,6 +111,7 @@ export const GetAnswersSchema = PaginatedSearchParamsSchema.extend({
 })
 
 export const AIAnswerSchema = z.object({
+  questionId: z.string("Question Id must be a string").min(1, "Question Id is required"),
   question: z.string("Question must be a string").min(1, "Question is required"),
   content: z.string("Content must be a string").min(1, "Content is required"),
   userAnswer: z.string("Content must be a string").optional(),

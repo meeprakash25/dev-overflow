@@ -1,16 +1,33 @@
+import { auth } from "@/auth"
 import handleError from "@/lib/handlers/error"
-import { ValidationError } from "@/lib/http-errors"
+import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/http-errors"
 import { AIAnswerSchema } from "@/lib/validations"
 import { NextResponse } from "next/server"
+import mongoose from "mongoose"
+import AiAnswer, { IAiAnswerDoc } from "@/app/(root)/database/ai-answer.model"
+import User from "@/app/(root)/database/user.model"
+import { maxAiAnswerCount } from "@/constants"
 
-export async function POST(req: Request) {
-  const { question, content, userAnswer } = await req.json()
+export async function POST(req: Request): Promise<APIResponse> {
+  const { questionId, question, content, userAnswer } = await req.json()
+
+  console.log(questionId)
 
   try {
-    const validatedData = AIAnswerSchema.safeParse({ question, content, userAnswer })
+    const validatedData = AIAnswerSchema.safeParse({ questionId, question, content, userAnswer })
 
     if (!validatedData.success) {
       throw new ValidationError(validatedData.error.flatten().fieldErrors)
+    }
+
+    const authSession = await auth()
+    const userId = authSession?.user?.id
+    if (!userId) throw new Error("Authentication required")
+
+    const user = await User.findById(userId).select("aiAnswerCount")
+    if (!user) throw new NotFoundError("User")
+    if ((user.aiAnswerCount ?? 0) >= maxAiAnswerCount) {
+      throw new ForbiddenError("You have reached the limit of 5 AI-generated answers.")
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY
@@ -32,7 +49,7 @@ export async function POST(req: Request) {
           {
             role: "system",
             content:
-              "You provide helpful, accurate answers in Markdown. Use appropriate Markdown for headings, lists, code, and emphasis. Use short lowercase language identifiers in fenced code blocks, such as js, py, ts, html, or css.",
+              "You provide helpful, accurate answers in Markdown. Use appropriate Markdown for headings, lists, code, and emphasis. Use short lowercase language identifiers in fenced code blocks, such as js, py, ts, html, or css. Return only the answer; never include safety classifications, moderation notes, internal analysis, or labels such as 'User Safety: safe'.",
           },
           {
             role: "user",
@@ -47,7 +64,7 @@ export async function POST(req: Request) {
             User's draft answer:
             ${userAnswer?.trim() || "No draft answer was provided."}
 
-            Use the draft only when it is correct. Correct or complete it when needed, and return the final answer in Markdown.`,
+            Use the draft only when it is correct. Correct or complete it when needed, and return the final answer in Markdown. Do not include safety classifications, moderation notes, or internal analysis.`,
           },
         ],
       }),
@@ -62,14 +79,75 @@ export async function POST(req: Request) {
       choices?: Array<{ message?: { content?: string | null } }>
       error?: { message?: string }
     }
-    const text = result.choices?.[0]?.message?.content
+    const generatedText = result.choices?.[0]?.message?.content
 
-    if (!text) {
+    if (!generatedText) {
       throw new Error(result.error?.message ?? "OpenRouter returned an empty answer")
     }
+
+    const text = generatedText.replace(/^\s*User Safety:\s*safe\s*$/gim, "").trim()
+    if (!text) {
+      throw new Error("OpenRouter returned a safety label instead of an answer")
+    }
+
+    await SaveAiAnswer({ questionId, answer: text, userId })
 
     return NextResponse.json({ success: true, data: text }, { status: 200 })
   } catch (error) {
     return handleError(error, "api") as APIErrorResponse
+  }
+}
+
+const SaveAiAnswer = async ({
+  questionId,
+  answer,
+  userId,
+}: {
+  questionId: string
+  answer: string
+  userId: string
+}): Promise<IAiAnswerDoc> => {
+  const mSession = await mongoose.startSession()
+  mSession.startTransaction()
+
+  try {
+    const [aiAnswer] = await AiAnswer.create(
+      [
+        {
+          question: questionId,
+          user: userId,
+          answer,
+        },
+      ],
+      { session: mSession },
+    )
+
+    if (!aiAnswer) throw new Error("Failed to save AI answer")
+
+    const user = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        $or: [{ aiAnswerCount: { $lt: 5 } }, { aiAnswerCount: { $exists: false } }],
+      },
+      { $inc: { aiAnswerCount: 1 } },
+      { session: mSession },
+    )
+    if (!user) {
+      const existingUser = await User.findById(userId).session(mSession)
+      if (!existingUser) throw new NotFoundError("User")
+      if ((existingUser.aiAnswerCount ?? 0) >= 5) {
+        throw new ForbiddenError(`You have reached the limit of ${maxAiAnswerCount} AI-generated answers.`)
+      }
+      throw new Error("Failed to update AI answer count")
+    }
+
+    await mSession.commitTransaction()
+
+    return aiAnswer
+  } catch (error) {
+    if (mSession.inTransaction()) await mSession.abortTransaction()
+    throw error
+  } finally {
+    await mSession.endSession()
   }
 }
