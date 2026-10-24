@@ -11,8 +11,6 @@ import { maxAiAnswerCount } from "@/constants"
 export async function POST(req: Request): Promise<APIResponse> {
   const { questionId, question, content, userAnswer } = await req.json()
 
-  console.log(questionId)
-
   try {
     const validatedData = AIAnswerSchema.safeParse({ questionId, question, content, userAnswer })
 
