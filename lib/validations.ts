@@ -167,3 +167,33 @@ export const CreateInteractionSchema = z.object({
   questionAuthorId: z.string().min(1),
   answerAuthorId: z.string().min(1).optional(),
 })
+
+export const ProfileSchema = z.object({
+  name: z
+    .string("Name must be a string")
+    .min(3, "Name must be at least 3 characters.")
+    .max(130, "Name musn't be longer then 130 characters."),
+  username: z.string("Username must be a string").min(3, "username musn't be longer then 100 characters."),
+  portfolio: z.union([z.url("Please provide valid URL"), z.literal("")]).optional(),
+  location: z
+    .union([z.string("Location must be a string").min(3, "Please provide proper location"), z.literal("")])
+    .optional(),
+  bio: z
+    .union([z.string("Bio must be a string").min(3, "Bio must be at least 3 characters."), z.literal("")])
+    .optional(),
+})
+
+export const UpdateUserSchema = z.object({
+  name: z
+    .string("Name must be a string")
+    .min(3, "Name must be at least 3 characters.")
+    .max(130, "Name musn't be longer then 130 characters."),
+  username: z.string("Username must be a string").min(3, "Username musn't be longer then 100 characters."),
+  portfolio: z.union([z.url("Please provide valid URL"), z.literal("")]).optional(),
+  location: z
+    .union([z.string("Location must be a string").min(3, "Please provide proper location"), z.literal("")])
+    .optional(),
+  bio: z
+    .union([z.string("Bio must be a string").min(3, "Bio must be at least 3 characters."), z.literal("")])
+    .optional(),
+})

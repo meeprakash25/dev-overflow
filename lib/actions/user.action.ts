@@ -3,7 +3,7 @@
 import { defaultPageSize } from "@/constants"
 import action from "../handlers/action"
 import handleError from "../handlers/error"
-import { GetUserSchema, PaginatedSearchParamsSchema } from "../validations"
+import { GetUserSchema, PaginatedSearchParamsSchema, UpdateUserSchema } from "../validations"
 import User from "@/app/(root)/database/user.model"
 import { PipelineStage, QueryFilter, Types } from "mongoose"
 import Question from "@/app/(root)/database/question.model"
@@ -308,6 +308,33 @@ export async function getUserStats(params: GetUserParams): Promise<
         totalAnswers: acount,
         badges,
       },
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}
+
+export async function updateUser(params: UpdateUserParams): Promise<ActionResponse<{ user: User }>> {
+  const validationResult = await action({
+    params,
+    schema: UpdateUserSchema,
+    authorize: true,
+  })
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const { user } = validationResult.session!
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(user?.id, params, {
+      new: true,
+    })
+
+    return {
+      success: true,
+      data: { user: JSON.parse(JSON.stringify(updatedUser)) },
     }
   } catch (error) {
     return handleError(error) as ErrorResponse

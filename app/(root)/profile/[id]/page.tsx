@@ -93,7 +93,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
 
             <div className="mt-5 flex flex-wrap items-center justify-start gap-5">
               {portfolio && <ProfileLink imgUrl="/icons/link.svg" href={portfolio} title="Portfolio" />}
-              {location && <ProfileLink imgUrl="/icons/location.svg" title="Location" />}
+              { location && <ProfileLink imgUrl="/icons/location.svg" title={location} />}
               {portfolio && <ProfileLink imgUrl="/icons/calendar.svg" title={dayjs(createdAt).format("MMMM YYYY")} />}
             </div>
             {bio && <p className="paragraph-regular text-dark100_light800 mt-8">{bio}</p>}
