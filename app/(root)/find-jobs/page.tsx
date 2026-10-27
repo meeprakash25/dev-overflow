@@ -3,7 +3,8 @@ import { fetchCountries, fetchJobs, fetchLocation } from "@/lib/actions/job.acti
 
 const Page = async ({ searchParams }: RouteParams) => {
   const { query, location } = await searchParams
-  const userLocation = await fetchLocation()
+  // const userLocation = await fetchLocation()
+  const userLocation = "United States"
 
   const countries = await fetchCountries()
   

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { AvatarFallback } from '@base-ui/react'
 
-const UserCard = ({_id, name, image, username}:User) => {
+const UserCard = ({_id, name, image, username, reputation}:User) => {
   return (
     <div className="shadow-light100_darknone w-full xs:w-[230px]">
       <article className="background-light900_dark200 light-border flex w-full flex-col items-center justify-center rounded-2xl border p-8">
@@ -19,8 +19,11 @@ const UserCard = ({_id, name, image, username}:User) => {
         />
         <Link href={ROUTES.PROFILE(_id)}>
           <div className="mt-4 text-center">
-            <h3 className="h3-bold text-dark200_light900 line-clamp-1">{name}</h3>
+            <h3 className="h3-bold text-dark200_light900 line-clamp-1">
+              {name}
+            </h3>
             <p className="body-regular text-dark500_light500 mt-2">@{username}</p>
+            <p className="text-[12px]! text-dark500_light500 mt-2">{reputation} points</p>
           </div>
         </Link>
       </article>

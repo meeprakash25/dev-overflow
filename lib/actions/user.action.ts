@@ -47,7 +47,7 @@ export async function getUsers(params: PaginatedSearchParams): Promise<ActionRes
       break
 
     default:
-      sortCriteria = { createdAt: -1 }
+      sortCriteria = { reputation: -1 }
       break
   }
 
