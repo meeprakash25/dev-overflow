@@ -131,3 +131,8 @@ interface RecommendationParams {
   skip: number
   limit: number
 }
+
+interface JobFilterParams {
+  query: string
+  cursor?: string
+}
