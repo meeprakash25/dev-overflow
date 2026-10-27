@@ -1,32 +1,29 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import JobCard from "../cards/JobCard"
+import JobListLoading from "./JobListLoading"
 import { fetchJobs } from "@/lib/actions/job.action"
 import { Button } from "../ui/button"
 
 interface JobListProps {
   initialJobs: Job[]
   initialCursor?: string
+  isLoading: boolean
   query: string
 }
 
-export default function JobList({ initialJobs, initialCursor, query }: JobListProps) {
+export default function JobList({ initialJobs, initialCursor, isLoading, query }: JobListProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [cursor, setCursor] = useState<string | undefined>(initialCursor)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    setJobs(initialJobs)
-    setCursor(initialCursor)
-  },[initialJobs])
 
   const loadMore = async () => {
     if (!cursor || loading) return
 
     setLoading(true)
     try {
-      const response = await fetchJobs({query, cursor})
+      const response = await fetchJobs({ query, cursor })
       // Append new jobs to the existing list
       setJobs((prev) => [...prev, ...response.data])
       // Update cursor for the next request
@@ -40,20 +37,26 @@ export default function JobList({ initialJobs, initialCursor, query }: JobListPr
 
   return (
     <div className="space-y-6">
-      {jobs?.length > 0 ?
-        jobs?.filter((job: Job) => job.job_title).map((job: Job) => <JobCard key={job.job_id} job={job} />)
-      : <div className="paragraph-regular text-dark200_light800 w-full text-center">
-          Oops! We couldn&apos;t find any jobs at the moment. Please try again later
-        </div>
-      }
+      {isLoading ? (
+        <JobListLoading />
+      ) : (
+        <>
+          {jobs.length > 0 ?
+            jobs.filter((job: Job) => job.job_title).map((job: Job) => <JobCard key={job.job_id} job={job} />)
+          : <div className="paragraph-regular text-dark200_light800 w-full text-center">
+              Oops! We couldn&apos;t find any jobs at the moment. Please try again later
+            </div>
+          }
 
-      {cursor && (
-        <Button
-          onClick={loadMore}
-          disabled={loading}
-          className="w-full primary-gradient min-h-[46px] px-4 py-3 text-light-900 rounded-lg  disabled:bg-gray-400 transition">
-          {loading ? "Loading..." : "Load More"}
-        </Button>
+          {cursor && (
+            <Button
+              onClick={loadMore}
+              disabled={loading}
+              className="w-full primary-gradient min-h-[46px] px-4 py-3 text-light-900 rounded-lg disabled:bg-gray-400 transition">
+              {loading ? "Loading..." : "Load More"}
+            </Button>
+          )}
+        </>
       )}
     </div>
   )

@@ -1,4 +1,5 @@
 import { cache } from "react"
+import logger from "../logger"
 
 export const fetchLocation = async () => {
   const response = await fetch("http://ip-api.com/json/?fields=country")
@@ -27,16 +28,19 @@ export const fetchCountries = async (): Promise<{ success: boolean, countries: C
       )
 
       if (!response.ok) {
-        let errorMessage = `HTTP error! status: ${response.status}`;
-        try {
-          const errorPayload = await response.json();
-          if (errorPayload?.errors && Array.isArray(errorPayload.errors) && errorPayload.errors[0]?.message) {
-            errorMessage = errorPayload.errors[0].message;
-          }
-        } catch (e) {
-          // ignore JSON parse errors, use default errorMessage
-        }
-        throw new Error(errorMessage);
+        const errorResponse = await response.json()
+        logger.error(errorResponse.errors[0].message)
+        throw new Error(`Failed to fetch countries. (${errorResponse.errors[0].message})`)
+        // let errorMessage = `HTTP error! status: ${response.status}`;
+        // try {
+        //   const errorPayload = await response.json();
+        //   if (errorPayload?.errors && Array.isArray(errorPayload.errors) && errorPayload.errors[0]?.message) {
+        //     errorMessage = errorPayload.errors[0].message;
+        //   }
+        // } catch (e) {
+        //   // ignore JSON parse errors, use default errorMessage
+        // }
+        // throw new Error(errorMessage);
       }
 
       const payload = await response.json()
@@ -98,7 +102,9 @@ export const fetchJobs = async (filters: JobFilterParams): Promise<JSearchRespon
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch jobs (${response.status})`)
+    const errorResponse = await response.json()
+    logger.error(errorResponse.message)
+    throw new Error(`Failed to fetch jobs (${errorResponse.message})`)
   }
 
   const result = await response.json()

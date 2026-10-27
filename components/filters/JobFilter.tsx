@@ -12,9 +12,10 @@ import { useState } from "react"
 interface JobsFilterProps {
   countriesList: Country[]
   location?: string
+  onFilterChange: (filters: { query?: string; location?: string }) => void
 }
 
-const JobsFilter = ({ countriesList, location }: JobsFilterProps) => {
+const JobsFilter = ({ countriesList, location, onFilterChange }: JobsFilterProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -23,6 +24,10 @@ const JobsFilter = ({ countriesList, location }: JobsFilterProps) => {
 
   const handleUpdateParams = (value: string) => {
     setSelectedLocation(value)
+    onFilterChange({
+      query: searchParams.get("query") ?? undefined,
+      location: value,
+    })
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       key: "location",
@@ -40,6 +45,7 @@ const JobsFilter = ({ countriesList, location }: JobsFilterProps) => {
         imgSrc="/icons/job-search.svg"
         placeholder="Job Title, Company, or Keywords"
         otherClasses="flex-1 max-sm:w-full"
+        onFilterChange={onFilterChange}
       />
 
       <Select value={selectedLocation} onValueChange={(value) => value && handleUpdateParams(value)}>

@@ -11,9 +11,10 @@ interface Props {
   placeholder: string
   iconPosition?: "left" | "right"
   otherClasses?: string
+  onFilterChange?: (filters: { query?: string; location?: string }) => void
 }
 
-const LocalSearch = ({ route, imgSrc, placeholder, iconPosition="left", otherClasses }: Props) => {
+const LocalSearch = ({ route, imgSrc, placeholder, iconPosition="left", otherClasses, onFilterChange }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -26,17 +27,24 @@ const LocalSearch = ({ route, imgSrc, placeholder, iconPosition="left", otherCla
     const delayDebounceFn = setTimeout(() => {
       if (searchQuery && searchQuery !== query) {
         const newUrl = formUrlQuery({ params: searchParamsString, key: "query", value: searchQuery })
+        onFilterChange?.({
+          query: searchQuery,
+          location: searchParams.get("location") ?? undefined,
+        })
         router.push(newUrl)
       } else {
         if (pathname === route && !searchQuery && query) {
           const newUrl = removeKeysFromUrlQuery({ params: searchParamsString, keysToRemove: ["query"] })
+          onFilterChange?.({
+            location: searchParams.get("location") ?? undefined,
+          })
           router.push(newUrl)
         }
       }
-    }, 300)
+    }, 500)
 
     return () => clearTimeout(delayDebounceFn)
-  }, [searchQuery, query, router, route, searchParamsString, pathname])
+  }, [searchQuery, query, router, route, searchParamsString, pathname, onFilterChange, searchParams])
 
   return (
     <div
