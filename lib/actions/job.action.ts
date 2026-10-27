@@ -84,8 +84,6 @@ interface JSearchResponse {
 export const fetchJobs = async (filters: JobFilterParams): Promise<JSearchResponse> => {
   const { query, cursor } = filters
 
-  // console.log("Query:", query)
-
   const headers = {
     "X-RapidAPI-Key": process.env.NEXT_PUBLIC_RAPID_API_KEY ?? "",
     "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
@@ -95,8 +93,6 @@ export const fetchJobs = async (filters: JobFilterParams): Promise<JSearchRespon
   url.searchParams.append("query", query)
   if (cursor) url.searchParams.append("cursor", cursor)
   
-  console.log(url)
-
   const response = await fetch(url.toString(), {
     headers,
   })
@@ -106,16 +102,6 @@ export const fetchJobs = async (filters: JobFilterParams): Promise<JSearchRespon
   }
 
   const result = await response.json()
-
-  // const result = (await response.json()) as { data?: { jobs?: Job[] } }
-
-  // if (!Array.isArray(jobs)) {
-  //   throw new Error("Job search returned an invalid response")
-  // }
-
-  console.log(result.data.jobs?.[0])
-
-  // return jobs
 
   return {
     status: response.status.toString(),

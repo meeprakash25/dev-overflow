@@ -25,7 +25,7 @@ const Page = async ({ searchParams }: RouteParams) => {
       </div>
 
       <section className="light-border mb-9 mt-11 flex flex-col gap-9 border-b pb-9">
-        <JobList initialJobs={data} initialCursor={cursor} query={query} />
+        <JobList initialJobs={data} initialCursor={cursor} query={formedQuery} />
       </section>
     </>
   )

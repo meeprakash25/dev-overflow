@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 const Loading = () => {
   return (
     <>
-      <h1 className="h1-bold text-dark100_light900">Jobs</h1>
+      <h1 className="h1-bold text-dark100_light900">Find Jobs</h1>
 
       <div className="mt-11 flex w-full justify-between gap-5 max-sm:flex-col sm:items-center">
         <Skeleton className="min-h-[56px] min-w-0 flex-1 rounded-[10px]" />

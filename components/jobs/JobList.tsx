@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import JobCard from "../cards/JobCard"
 import { fetchJobs } from "@/lib/actions/job.action"
 import { Button } from "../ui/button"
@@ -15,6 +15,11 @@ export default function JobList({ initialJobs, initialCursor, query }: JobListPr
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [cursor, setCursor] = useState<string | undefined>(initialCursor)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setJobs(initialJobs)
+    setCursor(initialCursor)
+  },[initialJobs])
 
   const loadMore = async () => {
     if (!cursor || loading) return
