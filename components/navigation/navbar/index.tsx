@@ -4,6 +4,7 @@ import ModeToggle from "./ModeToggle"
 import MobileNavigation from "./MobileNavigation"
 import { auth } from "@/auth"
 import UserAvatar from "@/components/UserAvatar"
+import GlobalSearch from "@/components/search/GlobalSearch"
 
 const Navbar = async () => {
   const session = await auth()
@@ -22,7 +23,7 @@ const Navbar = async () => {
           Dev<span className="text-primary-500">Flow</span>
         </p>
       </Link>
-      <p>Global Search</p>
+      <GlobalSearch />
       <div className="flex-between gap-5">
         <ModeToggle />
 

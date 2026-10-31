@@ -113,3 +113,9 @@ interface Country {
   name: { common: string }
   flag: { emoji: string }
 }
+
+interface GlobalSearchedItem {
+  id: string
+  type: "question" | "answer" | "user" | "tag"
+  title: string
+}

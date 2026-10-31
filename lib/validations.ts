@@ -197,3 +197,8 @@ export const UpdateUserSchema = z.object({
     .union([z.string("Bio must be a string").min(3, "Bio must be at least 3 characters."), z.literal("")])
     .optional(),
 })
+
+export const GlobalSearchSchema = z.object({
+  query: z.string("Query must be a string"),
+  type: z.string("Type must be a string").nullable().optional(),
+})
