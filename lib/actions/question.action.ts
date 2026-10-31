@@ -40,7 +40,10 @@ export async function createQuestion(params: CreateQuestionParams): Promise<Acti
   }
 
   const { title, content, tags } = params
-  const userId = validationResult?.session?.user?.id!
+  const userId = validationResult.session?.user?.id
+  if (!userId) {
+    return handleError(new Error("Unauthorized")) as ErrorResponse
+  }
 
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -362,7 +365,7 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
         targetId: { $in: answers.map((answer) => answer._id) },
       }).session(session)
       await Interaction.deleteMany({
-        action: { $in: ["post", "delete"] },
+        action: { $in: ["post", "upvote", "downvote"] },
         actionType: "answer",
         actionId: { $in: answers.map((answer) => answer._id) },
       }).session(session)
@@ -372,7 +375,7 @@ export async function deleteQuestion(params: DeleteQuestionParams): Promise<Acti
     await TagQuestion.deleteMany({ question: questionId }).session(session)
     await Vote.deleteMany({ targetType: "question", targetId: questionId }).session(session)
     await Interaction.deleteMany({
-      action: { $in: ["post", "delete"] },
+      action: { $in: ["post", "upvote", "downvote", "view", "bookmark"] },
       actionType: "question",
       actionId: questionId,
     }).session(session)

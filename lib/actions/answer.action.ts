@@ -25,7 +25,8 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
   }
 
   const { content, questionId } = validationResult.params!
-  const userId = validationResult.session?.user?.id!
+  const userId = validationResult.session?.user?.id
+  if (!userId) return handleError(new Error("Unauthorized")) as ErrorResponse
 
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -56,7 +57,7 @@ export async function createAnswer(params: CreateAnswerParams): Promise<ActionRe
       await createInteractionInTransaction(
         {
           action: "post",
-          actionId: question._id.toString(),
+          actionId: newAnswer._id.toString(),
           questionAuthorId: authorId,
           actionTarget: "answer",
         },
@@ -166,7 +167,11 @@ export async function deleteAnswer(params: DeleteAnswerParams): Promise<ActionRe
 
     await Question.findByIdAndUpdate(answer.question, { $inc: { answers: -1 } }).session(session)
 
-    await Interaction.deleteMany({ actionType: "answer", actionId: answerId }).session(session)
+    await Interaction.deleteMany({
+      action: { $in: ["post", "upvote", "downvote"] },
+      actionType: "answer",
+      actionId: answerId,
+    }).session(session)
 
 
     await updateReputationInTransaction({

@@ -83,7 +83,8 @@ export async function updateReputationInTransaction(params: UpdateReputationPara
 
   const { action, actionTarget, session, questionAuthorId, answerAuthorId } = params
 
-  const performerId = authSession?.user?.id!
+  const performerId = authSession.user?.id
+  if (!performerId) throw new Error("Only logged-in user can use this feature.")
 
   let performerPoints = 0
   let questionAuthorPoints = 0
@@ -140,7 +141,8 @@ export async function updateInteractionInTransaction(
   const authSession = await auth()
   if (!authSession) throw new Error("Only logged-in user can use this feature.")
 
-  const authUserId = authSession?.user?.id!
+  const authUserId = authSession.user?.id
+  if (!authUserId) throw new Error("Only logged-in user can use this feature.")
   const performerId = authUserId
 
   const { action: actionType, actionId, actionTarget, questionAuthorId, answerAuthorId } = params
@@ -208,7 +210,8 @@ export async function deleteInteractionInTransaction(
   const authSession = await auth()
   if (!authSession) throw new Error("Only logged-in user can use this feature.")
 
-  const authUserId = authSession?.user?.id!
+  const authUserId = authSession.user?.id
+  if (!authUserId) throw new Error("Only logged-in user can use this feature.")
   const performerId = authUserId
 
   const { action: actionType, actionId, actionTarget, questionAuthorId, answerAuthorId } = params

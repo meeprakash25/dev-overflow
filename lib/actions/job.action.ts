@@ -7,7 +7,7 @@ export const fetchLocation = async () => {
   return location.country
 }
 
-export const fetchCountries = async (): Promise<{ success: boolean, countries: Country[]}> => {
+export const fetchCountries = cache(async (): Promise<{ success: boolean, countries: Country[]}> => {
   const API_KEY = process.env.NEXT_RESTCOUNTRIES_API_KEY
   const BASE_URL = "https://api.restcountries.com/countries/v5"
 
@@ -71,13 +71,14 @@ export const fetchCountries = async (): Promise<{ success: boolean, countries: C
       success: true,
       countries: allCountries
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.log(error)
     return {
       success: false,
       countries: allCountries,
     }
   }
-}
+})
 
 interface JSearchResponse {
   status: string
@@ -85,7 +86,7 @@ interface JSearchResponse {
   cursor?: string
 }
 
-export const fetchJobs = async (filters: JobFilterParams): Promise<JSearchResponse> => {
+export const fetchJobs = cache(async (filters: JobFilterParams): Promise<JSearchResponse> => {
   const { query, cursor } = filters
 
   const headers = {
@@ -114,4 +115,4 @@ export const fetchJobs = async (filters: JobFilterParams): Promise<JSearchRespon
     data: result.data.jobs,
     cursor: result.data.cursor
   }
-}
+})
