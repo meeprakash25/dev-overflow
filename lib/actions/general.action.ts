@@ -8,7 +8,7 @@ import { GlobalSearchSchema } from "../validations"
 
 export async function globalSearch(params: GlobalSearchParams) {
   try {
-    console.log("QUERY", params)
+    // console.log("QUERY", params)
 
     const validationResult = await action({
       params,
@@ -88,7 +88,7 @@ export async function globalSearch(params: GlobalSearchParams) {
       })
     }
 
-    console.log(results)
+    // console.log(results)
 
     return {
       success: true,
