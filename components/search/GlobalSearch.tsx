@@ -15,11 +15,14 @@ const GlobalSearch = () => {
   const searchParams = useSearchParams()
 
   const query = searchParams.get("global")
+  const queryType = searchParams.get("type")
   const searchParamsString = searchParams.toString()
 
-  const [search, setSearch] = useState(query || "")
-  const [isOpen, setIsOpen] = useState(query || false)
+  const [search, setSearch] = useState<string>(query || "")
+  const [isOpen, setIsOpen] = useState<boolean | string>(query || false)
   const searchContainerRef = useRef(null)
+
+  const [type, setType] = useState<string>(queryType || "")
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -30,6 +33,7 @@ const GlobalSearch = () => {
       ) {
         setIsOpen(false)
         setSearch("")
+        setType("")
       }
     }
 
@@ -45,8 +49,16 @@ const GlobalSearch = () => {
       if (search) {
         if (search === query) return
 
+        const params = new URLSearchParams(searchParamsString)
+        console.log("params: ", params.toString())
+        if (type) {
+          params.set("type", type)
+        } else {
+          params.delete("type")
+        }
+
         const newUrl = formUrlQuery({
-          params: searchParamsString,
+          params: params.toString(),
           key: "global",
           value: search,
         })
@@ -65,7 +77,7 @@ const GlobalSearch = () => {
     }, 300)
 
     return () => clearTimeout(delayDebounceFn)
-  }, [search, pathname, router, searchParamsString, query])
+  }, [search, pathname, router, searchParamsString, query, queryType, type])
 
   return (
     <div className="relative w-full max-w-[600px] max-lg:hidden" ref={searchContainerRef}>
@@ -84,7 +96,7 @@ const GlobalSearch = () => {
           className="paragraph-regular no-focus placeholder text-dark400_light700 border-none shadow-none outline-none"
         />
       </div>
-      {isOpen && <GlobalResult />}
+      {isOpen && <GlobalResult onTypeChange={setType} />}
     </div>
   )
 }

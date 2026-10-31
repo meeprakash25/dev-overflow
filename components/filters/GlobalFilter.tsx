@@ -6,7 +6,11 @@ import { useState } from "react"
 import { GlobalSearchFilters } from "@/constants/filters"
 import { formUrlQuery } from "@/lib/url"
 
-const GlobalFilter = () => {
+interface GlobalFilterProps {
+  onTypeChange: (type: string) => void
+}
+
+const GlobalFilter = ({ onTypeChange }: GlobalFilterProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -15,27 +19,15 @@ const GlobalFilter = () => {
   const [active, setActive] = useState(typeParams || "")
 
   const handleTypeClick = (item: string) => {
-    let newUrl = ""
+    const nextType = active === item ? "" : item.toLowerCase()
+    setActive(nextType)
+    onTypeChange(nextType)
 
-    if (active === item) {
-      setActive("")
-
-      newUrl = formUrlQuery({
-        params: searchParams.toString(),
-        key: "type",
-        value: "",
-      })
-
-      router.push(newUrl, { scroll: false })
-    } else {
-      setActive(item)
-
-      newUrl = formUrlQuery({
-        params: searchParams.toString(),
-        key: "type",
-        value: item.toLowerCase(),
-      })
-    }
+    const newUrl = formUrlQuery({
+      params: searchParams.toString(),
+      key: "type",
+      value: nextType,
+    })
 
     router.push(newUrl, { scroll: false })
   }

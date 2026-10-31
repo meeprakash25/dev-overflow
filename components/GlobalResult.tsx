@@ -10,7 +10,11 @@ import { globalSearch } from "@/lib/actions/general.action"
 
 import GlobalFilter from "./filters/GlobalFilter"
 
-const GlobalResult = () => {
+interface GlobalResultProps {
+  onTypeChange: (type: string) => void
+}
+
+const GlobalResult = ({ onTypeChange }: GlobalResultProps) => {
   const searchParams = useSearchParams()
 
   const [result, setResult] = useState([])
@@ -29,9 +33,6 @@ const GlobalResult = () => {
           query: global as string,
           type,
         })
-
-        console.log(res)
-
         setResult(res.data)
       } catch (error) {
         console.log(error)
@@ -63,7 +64,7 @@ const GlobalResult = () => {
 
   return (
     <div className="absolute top-full z-10 mt-3 w-full rounded-xl bg-light-800 py-5 shadow-sm dark:bg-dark-400">
-      <GlobalFilter />
+      <GlobalFilter onTypeChange={onTypeChange} />
       <div className="my-5 h-[1px] bg-light-700/50 dark:bg-dark-500/50" />
 
       <div className="space-y-5">
